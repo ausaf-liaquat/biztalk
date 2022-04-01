@@ -17,7 +17,9 @@
     <div class="navbar-menu-wrapper d-flex align-items-top" style="border-bottom: 1px solid #c7c3c3;">
         <ul class="navbar-nav">
             <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
-                <h1 class="welcome-text" style="font-size: medium;">Welcome, <span class="text-black fw-bold">Admin</span></h1>
+                <h1 class="welcome-text" style="font-size: medium;">Welcome, <span class="text-black fw-bold"> @if (auth()->user()->HasRole('superadmin'))
+                    Super Admin
+                @endif </span></h1>
                 {{-- <h3 class="welcome-sub-text">Your performance summary this week </h3> --}}
             </li>
         </ul>
