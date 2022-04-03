@@ -19,9 +19,20 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'username',
         'email',
         'password',
+        'isaccount_public',
+        'profile_image',
+        'location',
+        'country',
+        'total_followings',
+        'total_followers',
+        'total_likes',
+        'otp',
+        'is_verified',
     ];
 
     /**
@@ -40,6 +51,23 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'datetime','ban_time'=>'datetime'
     ];
+
+    public function generateOTP()
+    {
+        $this->timestamps = false;
+        $this->otp = random_int(100000, 999999);
+        // $this->two_factor_expires_at = now()->addMinutes(10);
+        $this->save();
+    }
+   
+    public function resetOTP()
+    {
+        $this->timestamps = false;
+        $this->otp = null;
+       
+        $this->save();
+    }
+   
 }

@@ -20,9 +20,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     // });
     Route::post('/auth/register', [ApiAuthController::class, 'register']);
     Route::post('/auth/login', [ApiAuthController::class, 'login']);
-    Route::group(['middleware' => ['auth:sanctum']], function () {
 
+    Route::post('/verify/otp', [App\Http\Controllers\Api\VerifyOTPController::class, 'store'])->middleware('auth:sanctum');
+    
+    Route::post('/auth/forget-password', [ApiAuthController::class, 'forget_password']);
+    Route::get('/reset-password/{token}', [ApiAuthController::class, 'newPassword'])->name('password.reset');
+    Route::post('/reset-password', [ApiAuthController::class, 'newPasswordstore'])->name('password.update');
+    
+    Route::group(['middleware' => ['auth:sanctum','apiverified']], function () {
 
+        Route::get('/user', [ApiAuthController::class, 'userinfo']);
 
     });
 

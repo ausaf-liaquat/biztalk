@@ -71,8 +71,8 @@
 
         .bg-gray-100 {
             --bg-opacity: 1;
-            background-color: #f7fafc;
-            background-color: rgba(247, 250, 252, var(--bg-opacity))
+            background-color: #f3f3f3;
+            /* background-color: rgba(247, 250, 252, var(--bg-opacity)) */
         }
 
         .border-gray-200 {
