@@ -30,5 +30,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'twilio' => [
+        'sid' => array_key_exists('TWILIO_SID', $_SERVER) ? $_SERVER['TWILIO_SID'] : env('TWILIO_SID'),
+        'token' => array_key_exists('TWILIO_TOKEN', $_SERVER) ? $_SERVER['TWILIO_TOKEN'] : env('TWILIO_TOKEN'),
+        'number' => array_key_exists('TWILIO_FROM', $_SERVER) ? $_SERVER['TWILIO_FROM'] : env('TWILIO_FROM'),
+    ],
+
 
 ];

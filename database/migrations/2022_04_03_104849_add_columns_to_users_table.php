@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('otp')->nullable();
-            $table->string('is_verified')->nullable();
+            $table->string('is_verified')->default('pending')->nullable();
         });
     }
 

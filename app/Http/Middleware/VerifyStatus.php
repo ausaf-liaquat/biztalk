@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-
+use Helper;
 class VerifyStatus
 {
     /**
@@ -19,7 +19,7 @@ class VerifyStatus
 
         if ($request->user()->is_verified !== "active") {
             if ($request->expectsJson()) {
-                return response()->json(['status'=>403,'message'=>'Enter 6 Digit Code which sent on your email']);
+                return response()->json(['status'=>Helper::ApiErrorStatus(),'message'=>'Enter 6 Digit Code which sent on your email'],403);
             }
         }
 

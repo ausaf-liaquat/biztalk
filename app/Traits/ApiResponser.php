@@ -2,7 +2,7 @@
 
 namespace App\Traits;
 
-
+use Helper;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +26,7 @@ trait ApiResponser
 	protected function success($data, string $message = null, int $code = 200)
 	{
 		return response()->json([
-			'status' => ApiSuccessStatus(),
+			'status' => Helper::ApiSuccessStatus(),
 			'message' => $message,
 			'data' => $data
 		], $code);
@@ -43,7 +43,7 @@ trait ApiResponser
 	protected function error(string $message = null, int $code, $data = null)
 	{
 		return response()->json([
-			'status' => 'Error',
+			'status' => Helper::ApiErrorStatus(),
 			'message' => $message,
 			'data' => $data
 		], $code);
