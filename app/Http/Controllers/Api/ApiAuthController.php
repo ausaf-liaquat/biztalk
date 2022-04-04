@@ -110,7 +110,7 @@ class ApiAuthController extends Controller
             'email' => "required|email",
         ]);
         if ($validator->fails()) {
-            return response(['errors' => $validator->errors()->all()], 422);
+            return response(['status' => Helper::ApiErrorStatus(), 'errors' => $validator->errors()->all()], 422);
         }
         $response = Password::sendResetLink($input);
         if ($response == Password::RESET_LINK_SENT) {
@@ -119,7 +119,7 @@ class ApiAuthController extends Controller
             $message = "Email could not be sent to this email address";
         }
         //$message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : GLOBAL_SOMETHING_WANTS_TO_WRONG;
-        $response = ['data' => '', 'message' => $message];
+        $response = ["status" => Helper::ApiSuccessStatus(), 'data' => '', 'message' => $message];
         return response($response, 200);
 
     }
@@ -156,16 +156,37 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        $pat = DB::table('personal_access_tokens')
-            ->where('token', hash('sha256', $token))->first();
-
-        if ($request->get('mac_id') == $pat->mac_id ) {
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
 
             $user = Auth::user();
             return response()->json(["status" => Helper::ApiSuccessStatus(), "message" => "Authenticated User Information", "data" => array($user)], 200);
 
         } else {
             return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+        }
+
+    }
+    public function logout()
+    {
+        Auth::user()->tokens()->delete();
+
+        return [
+            'message' => 'Tokens Revoked',
+        ];
+    }
+    public function usernameValidation(Request $request)
+    {
+
+        $request->validate([
+            'username' => 'required|string|max:255',
+        ]);
+        $user_name = $request->only('username');
+        User::where('username', $user_name);
+        // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
+        if (User::where('username', $user_name)->count() > 0) {
+            return response()->json(["status" => Helper::ApiErrorStatus(), "message" => "This Username already exists."], 422);
+        } else {
+            return response()->json(["status" => Helper::ApiSuccessStatus(), "message" => "valid username"], 200);
         }
 
     }
