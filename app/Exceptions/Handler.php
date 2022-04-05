@@ -86,6 +86,18 @@ class Handler extends ExceptionHandler
             }
             return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));  
         }
+        if ($exception instanceof \Error) {
+            if ($request->expectsJson()) {
+                return response()->json(['status'=>Helper::ApiFailedStatus(),'message' =>  $exception->getMessage()],500);
+            }
+            return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));  
+        }
+        if ($exception instanceof \Illuminate\Database\QueryException) {
+            if ($request->expectsJson()) {
+                return response()->json(['status'=>Helper::ApiFailedStatus(),'message' =>  $exception->getMessage()],500);
+            }
+            return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));  
+        }
         return parent::render($request, $exception);
     }
 }

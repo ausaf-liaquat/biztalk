@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Video;
 
 class User extends Authenticatable
 {
@@ -71,4 +72,8 @@ class User extends Authenticatable
         $this->save();
     }
    
+    public function videos()
+    {
+        return $this->hasMany(Video::class);
+    }
 }

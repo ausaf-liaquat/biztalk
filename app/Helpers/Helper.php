@@ -33,7 +33,6 @@ class Helper
         if ($macid==$pat->mac_id) {
             return true;
         } else {
-
             return false;
         }
         

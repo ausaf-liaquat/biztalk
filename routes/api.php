@@ -31,7 +31,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::group(['middleware' => ['auth:sanctum','apiverified']], function () {
 
         Route::get('/user', [ApiAuthController::class, 'userinfo']);
+        Route::post('update/profile-image', [ApiAuthController::class, 'update_profileImage']);
+        Route::get('/profile/img', [ApiAuthController::class, 'profile_img_url']);
 
+        Route::post('/post/video', [ApiAuthController::class, 'post_video']);
+        Route::get('/video/url', [ApiAuthController::class, 'video_url']);
     });
 
 

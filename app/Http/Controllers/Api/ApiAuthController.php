@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Video;
 use App\Notifications\SendOtp;
 use App\Traits\ApiResponser;
 use Helper;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Twilio\Rest\Client;
 
@@ -189,5 +191,108 @@ class ApiAuthController extends Controller
             return response()->json(["status" => Helper::ApiSuccessStatus(), "message" => "valid username"], 200);
         }
 
+    }
+    public function update_profileImage(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            try {
+
+                $base64_image = $request->profile_image;
+                if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
+
+                    // $folderpath = "uploads/avtars/";
+
+                    $data = substr($base64_image, strpos($base64_image, ',') + 1);
+
+                    $imageName = $request->user()->id . '_' . strtolower($request->user()->username) . '_' . date('d-m-Y-H-i') . '.' . 'jpg';
+                    $data = substr($base64_image, strpos($base64_image, ',') + 1);
+                    $data = base64_decode($data);
+                    Storage::disk('public')->put('avtars/' . $imageName, $data);
+
+                    $id = Auth()->user()->id;
+                    $User = User::find($id);
+                    $User->profile_image = $imageName;
+                    $User->save();
+
+                    return response()->json(['status' => Helper::ApiSuccessStatus()], 200);
+                }
+
+            } catch (Exception $e) {
+                return response()->json(["status" => Helper::ApiFailedStatus(), "message" => $e->getMessage()], 500);
+            }
+        } else {
+            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+        }
+    }
+    public function profile_img_url(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
+            return \Response::json(["message" => "Profile Image", "data" => array($profile_image)], 200);
+        } else {
+            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+        }
+    }
+    public function post_video(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            try {
+                if ($request->hasFile('file')) {
+                    $video = Video::create([
+
+                        'user_id' => Auth::user()->id,
+                        'is_flagged' => $request->get('is_flagged'),
+                        'is_approved' => $request->get('is_approved'),
+                        'video_title' => $request->get('video_title'),
+                        'video_description' => $request->get('video_description'),
+                        'hashtags' => $request->get('hashtags'),
+                        'video_category' => $request->get('video_category'),
+                        'investment_req' => $request->get('investment_req'),
+                        'allow_comment' => $request->get('allow_comment'),
+                        'is_active' => $request->get('is_active'),
+                        'privacy' => $request->get('privacy'),
+                        'location' => $request->get('location'),
+                        'total_comments' => $request->get('total_comments'),
+                        'total_shares' => $request->get('total_shares'),
+                        'total_likes' => $request->get('total_likes'),
+
+                    ]);
+                    $file = $request->file('file');
+                    $filename = Auth::user()->id . '_' . rand(000, 999) . '_' . $file->getClientOriginalName();
+                    $data = file_get_contents($file);
+                    Storage::disk('public')->put('videos/' . $filename, $data);
+                    $video->video_name = $filename;
+                    $video->save();
+                }
+            } catch (Exception $e) {
+                return response()->json(['status' => Helper::ApiErrorStatus(), 'message' => $e->getMessage()], 500);
+            }
+
+            return response()->json(['status' => Helper::ApiSuccessStatus(), 'message' => 'video uploaded'], 200);
+        } else {
+            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+        }
+    }
+    public function video_url(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $videos = Video::where('user_id', Auth::user()->id)->get();
+            $v_url = array();
+            foreach ($videos as $i) {
+                $v_url[] = asset('uploads/videos/' . $i->video_name);
+            }
+
+            return response()->json(['status' => Helper::ApiSuccessStatus(), 'url' => $v_url], 200);
+        } else {
+            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+        }
     }
 }
