@@ -29,9 +29,15 @@ class DashboardController extends Controller
             // ->addIndexColumn()
 
                 ->addColumn('user', function ($row) {
-
-                    $user = "<img src='" . asset('uploads/avtars/' . $row->profile_image) . "' style='border-radius: 5px;' alt='image' />";
-                    return $user;
+                    if ($row->profile_image == null) {
+                        $user = "<img src='" . asset('assets/images/faces/face1.jpg') . "' style='border-radius: 5px;' alt='image' />";
+                    return $user; 
+                    } else {
+                       $user = "<img src='" . asset('uploads/avtars/' . $row->profile_image) . "' style='border-radius: 5px;' alt='image' />";
+                    return $user; 
+                    }
+                    
+                    
 
                 })
                 ->addColumn('name', function ($row) {
@@ -52,9 +58,11 @@ class DashboardController extends Controller
                 })
                 ->addColumn('status', function ($row) {
                     if ($row->is_verified == "pending") {
-                        $status = "<label class='badge badge-danger'>Pending</label>";
+                        $status = "<label class='badge badge-warning'>Pending</label>";
                     } elseif ($row->is_verified == "active") {
                         $status = "<label class='badge badge-success'>Active</label>";
+                    } else {
+                        $status="<label class='badge badge-danger'>".$row->is_verified."</label>";
                     }
 
                     return $status;
@@ -82,6 +90,26 @@ class DashboardController extends Controller
     }
     public function useredit($id)
     {
-        return view('Backend.pages.edit-user');
+        $user= User::find($id);
+        return view('Backend.pages.edit-user',compact('user'));
+    }
+    public function userupdate(Request $request)
+    {
+        $request->validate([
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'username'=>'required|unique:users,username',
+            'email'=>'required|unique:users,email',
+            'phone'=>'required|unique:users,phone_no'
+        ]);
+        $user = User::find($request->id)->update([
+            'first_name'=>$request->get('first_name'),
+            'last_name'=>$request->get('last_name'),
+            'username'=>$request->get('username'),
+            'email'=>$request->get('email'),
+            'phone_no'=>$request->get('phone'),
+        ]);
+
+        return redirect()->route('user.index')->with('success','User details updated');
     }
 }

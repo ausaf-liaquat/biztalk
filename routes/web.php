@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user',[DashboardController::class,'userindex'])->name('user.index');
     Route::get('/user/data',[DashboardController::class,'userdata'])->name('user.data');
     Route::get('/user/edit/{id}',[DashboardController::class,'useredit'])->name('user.edit');
- 
+    Route::post('/user/update',[DashboardController::class,'userupdate'])->name('user.update');
+
+
+
 });
 require __DIR__.'/auth.php';
