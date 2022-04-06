@@ -36,6 +36,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
         Route::post('/post/video', [ApiAuthController::class, 'post_video']);
         Route::get('/video/url', [ApiAuthController::class, 'video_url']);
+        Route::get('/videos', [ApiAuthController::class, 'videos_list']);
     });
 
 

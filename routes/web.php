@@ -59,6 +59,8 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
     Route::get('/user',[DashboardController::class,'userindex'])->name('user.index');
+    Route::get('/user/data',[DashboardController::class,'userdata'])->name('user.data');
+    Route::get('/user/edit/{id}',[DashboardController::class,'useredit'])->name('user.edit');
  
 });
 require __DIR__.'/auth.php';

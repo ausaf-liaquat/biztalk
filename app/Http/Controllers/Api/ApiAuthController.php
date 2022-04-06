@@ -90,9 +90,8 @@ class ApiAuthController extends Controller
 
         $user = Auth::user();
         if ($user->is_verified !== 'active') {
-            return response()->json(['status' => Helper::ApiErrorStatus(),
-                'message' => 'Your account has been inactive/suspended by our admin, please contact support for further details',
-            ], 401);
+            return $this->error([
+            ], 'Your account has been inactive/suspended by our admin, please contact support for further details', 401);
         }
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
@@ -161,10 +160,10 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
             $user = Auth::user();
-            return response()->json(["status" => Helper::ApiSuccessStatus(), "message" => "Authenticated User Information", "data" => array($user)], 200);
+            return $this->success([$user], "Authenticated User Information", 200);
 
         } else {
-            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+            return $this->fail("UnAuthorized", 500);
         }
 
     }
@@ -172,9 +171,7 @@ class ApiAuthController extends Controller
     {
         Auth::user()->tokens()->delete();
 
-        return [
-            'message' => 'Tokens Revoked',
-        ];
+        return $this->success([],"Token Revoked",200);
     }
     public function usernameValidation(Request $request)
     {
@@ -186,9 +183,9 @@ class ApiAuthController extends Controller
         User::where('username', $user_name);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
         if (User::where('username', $user_name)->count() > 0) {
-            return response()->json(["status" => Helper::ApiErrorStatus(), "message" => "This Username already exists."], 422);
+            return $this->error("This Username already exists.", 422);
         } else {
-            return response()->json(["status" => Helper::ApiSuccessStatus(), "message" => "valid username"], 200);
+            return $this->success([],"valid username", 200);
         }
 
     }
@@ -216,14 +213,14 @@ class ApiAuthController extends Controller
                     $User->profile_image = $imageName;
                     $User->save();
 
-                    return response()->json(['status' => Helper::ApiSuccessStatus()], 200);
+                    return $this->success([],"Profile updated", 200);
                 }
 
             } catch (Exception $e) {
-                return response()->json(["status" => Helper::ApiFailedStatus(), "message" => $e->getMessage()], 500);
+                return $this->fail($e->getMessage(), 500);
             }
         } else {
-            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+            return $this->fail("UnAuthorized", 500);
         }
     }
     public function profile_img_url(Request $request)
@@ -232,9 +229,9 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
-            return \Response::json(["message" => "Profile Image", "data" => array($profile_image)], 200);
+            return $this->success([$profile_image],"Profile Image", 200);
         } else {
-            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+            return $this->fail("UnAuthorized", 500);
         }
     }
     public function post_video(Request $request)
@@ -271,12 +268,12 @@ class ApiAuthController extends Controller
                     $video->save();
                 }
             } catch (Exception $e) {
-                return response()->json(['status' => Helper::ApiErrorStatus(), 'message' => $e->getMessage()], 500);
+                return $this->error($e->getMessage(), 500);
             }
 
-            return response()->json(['status' => Helper::ApiSuccessStatus(), 'message' => 'video uploaded'], 200);
+            return $this->success([],'video uploaded', 200);
         } else {
-            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+            return $this->fail("UnAuthorized", 500);
         }
     }
     public function video_url(Request $request)
@@ -290,9 +287,26 @@ class ApiAuthController extends Controller
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return response()->json(['status' => Helper::ApiSuccessStatus(), 'url' => $v_url], 200);
+            return $this->success([ $v_url],"Videos url", 200);
         } else {
-            return response()->json(["status" => Helper::ApiFailedStatus(), "message" => "UnAuthorized"], 500);
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function videos_list(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            
+            $videos = Video::latest()->get();
+            $v_url = array();
+            foreach ($videos as $i) {
+                $v_url[] = asset('uploads/videos/' . $i->video_name);
+            }
+
+            return $this->success([$v_url],'Videos list', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
         }
     }
 }

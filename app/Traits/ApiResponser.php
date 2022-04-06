@@ -49,4 +49,21 @@ trait ApiResponser
 		], $code);
 	}
 
+	/**
+     * Return an error JSON response.
+     *
+     * @param  string  $message
+     * @param  int  $code
+     * @param  array|string|null  $data
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function fail(string $message = null, int $code, $data = null)
+    {
+	    return response()->json([
+		    'status' => Helper::ApiFailedStatus(),
+		    'message' => $message,
+		    'data' => $data
+	    ], $code);
+    }
+
 }
