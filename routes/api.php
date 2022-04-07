@@ -27,7 +27,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::get('/reset-password/{token}', [ApiAuthController::class, 'newPassword'])->name('password.reset');
     Route::post('/reset-password', [ApiAuthController::class, 'newPasswordstore'])->name('password.update');
     Route::post('/auth/username', [ApiAuthController::class, 'usernameValidation'])->name('check.username');
-    
+    Route::post('/auth/email', [ApiAuthController::class, 'emailValidation'])->name('check.email');
+    Route::post('/auth/phone', [ApiAuthController::class, 'phoneValidation'])->name('check.phone');
+
+
+
     Route::group(['middleware' => ['auth:sanctum','apiverified']], function () {
 
         Route::get('/user', [ApiAuthController::class, 'userinfo']);

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->tinyInteger('is_flagged')->default(0);
             $table->tinyInteger('is_approved')->default(0);
             $table->string('video_title')->nullable();

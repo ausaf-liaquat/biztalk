@@ -36,7 +36,7 @@ class ApiAuthController extends Controller
             'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
             'location' => 'required',
             'country' => 'required',
-           
+
         ]);
 
         //User Registration
@@ -171,7 +171,7 @@ class ApiAuthController extends Controller
     {
         Auth::user()->tokens()->delete();
 
-        return $this->success([],"Token Revoked",200);
+        return $this->success([], "Token Revoked", 200);
     }
     public function usernameValidation(Request $request)
     {
@@ -179,13 +179,45 @@ class ApiAuthController extends Controller
         $request->validate([
             'username' => 'required|string|max:255',
         ]);
-        $user_name = $request->only('username');
+        $user_name = $request->get('username');
         User::where('username', $user_name);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
         if (User::where('username', $user_name)->count() > 0) {
-            return $this->error("This Username already exists.", 422);
+            return $this->error("This Username already exists.", 422, [$user_name]);
         } else {
-            return $this->success([],"valid username", 200);
+            return $this->success([$user_name], "valid username", 200);
+        }
+
+    }
+    public function emailValidation(Request $request)
+    {
+
+        $request->validate([
+            'email' => 'required|string|max:255',
+        ]);
+        $email = $request->get('email');
+        User::where('email', $email);
+        // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
+        if (User::where('email', $email)->count() > 0) {
+            return $this->error("This Email already exists.", 422);
+        } else {
+            return $this->success([], "valid email", 200);
+        }
+
+    }
+    public function phoneValidation(Request $request)
+    {
+
+        $request->validate([
+            'phone' => 'required|regex:/^\+[1-9]\d{1,14}$/|max:15',
+        ]);
+        $phone = $request->get('phone');
+        User::where('phone_no', $phone);
+        // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
+        if (User::where('phone_no', $phone)->count() > 0) {
+            return $this->error("This Phone no already exists.", 422);
+        } else {
+            return $this->success([], "valid phone no", 200);
         }
 
     }
@@ -213,7 +245,7 @@ class ApiAuthController extends Controller
                     $User->profile_image = $imageName;
                     $User->save();
 
-                    return $this->success([],"Profile updated", 200);
+                    return $this->success([], "Profile updated", 200);
                 }
 
             } catch (Exception $e) {
@@ -229,7 +261,7 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
-            return $this->success([$profile_image],"Profile Image", 200);
+            return $this->success([$profile_image], "Profile Image", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -271,7 +303,7 @@ class ApiAuthController extends Controller
                 return $this->error($e->getMessage(), 500);
             }
 
-            return $this->success([],'video uploaded', 200);
+            return $this->success([], 'video uploaded', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -287,7 +319,7 @@ class ApiAuthController extends Controller
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return $this->success([ $v_url],"Videos url", 200);
+            return $this->success([$v_url], "Videos url", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -297,14 +329,14 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-            
+
             $videos = Video::latest()->get();
             $v_url = array();
             foreach ($videos as $i) {
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return $this->success([$v_url],'Videos list', 200);
+            return $this->success([$v_url], 'Videos list', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }

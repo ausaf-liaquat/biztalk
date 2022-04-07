@@ -279,6 +279,6 @@ class DashboardController extends Controller
         $video = Video::find($request->video_id);
         $video->is_approved = $request->get('is_approved');
         $video->update();
-        return redirect()->route('video.index')->with('success', 'User status updated');
+        return redirect()->route('video.index')->with('success', 'Video status updated');
     }
 }
