@@ -13,39 +13,50 @@
                             @csrf
                             <input type="hidden" value="{{ $user->id }}" name="id">
                             <div class="form-group">
-                                <img src="{{ asset('uploads/avtars/'.$user->profile_image) }}" alt="" style="border-radius: 12px;width: 100px;">
+                                <img src="{{ asset('uploads/avtars/' . $user->profile_image) }}" alt=""
+                                    style="border-radius: 12px;width: 100px;">
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputUsername1">Username</label>
-                                <input type="text" class="form-control" id="exampleInputUsername1" placeholder="Username"
+                                <input type="text" class="form-control" id="exampleInputUsername1" onkeyup="duplicateUsername(this)" placeholder="Username"
                                     name="username" value="{{ $user->username }}">
-                                    <span class="text-danger"
-                                    style="font-size: small;font-weight: 700;">@error('username') Must be unique. @enderror</span>
+                                    <span class="text-danger mb-4 username-error" id="username-error"
+                                    style="font-size: small;"></span>
                             </div>
                             <div class="form-group">
                                 <label for="first_name">First Name</label>
-                                <input type="text" class="form-control" id="first_name" placeholder="First name" name="first_name" value="{{ $user->first_name }}">
-                                <span class="text-danger"
-                                    style="font-size: small;font-weight: 700;">@error('first_name') This field is required. @enderror</span>
+                                <input type="text" class="form-control" id="first_name" placeholder="First name"
+                                    name="first_name" value="{{ $user->first_name }}">
+                                <span class="text-danger" style="font-size: small;font-weight: 700;">
+                                    @error('first_name')
+                                        This field is required.
+                                    @enderror
+                                </span>
                             </div>
                             <div class="form-group">
                                 <label for="last_name">Last Name</label>
                                 <input type="text" class="form-control" id="last_name" placeholder="Last name"
                                     name="last_name" value="{{ $user->last_name }}">
-                                    <span class="text-danger"
-                                    style="font-size: small;font-weight: 700;">@error('last_name') This field is required. @enderror</span>
+                                <span class="text-danger" style="font-size: small;font-weight: 700;">
+                                    @error('last_name')
+                                        This field is required.
+                                    @enderror
+                                </span>
                             </div>
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Email address</label>
-                                <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email" value="{{ $user->email }}" name="email">
-                                <span class="text-danger"
-                                    style="font-size: small;font-weight: 700;">@error('email') Must be unique. @enderror</span>
+                                <input type="email" class="form-control" id="exampleInputEmail1"
+                                    onkeyup="duplicateEmail(this)" placeholder="Email" value="{{ $user->email }}"
+                                    name="email">
+                                <span class="text-danger mb-4 email-error" id="email-error"
+                                    style="font-size: small;"></span>
                             </div>
                             <div class="form-group">
                                 <label for="phone">Phone no</label>
-                                <input type="text" class="form-control" id="phone" placeholder="Phone" value="{{ $user->phone_no }}" name="phone">
-                                <span class="text-danger"
-                                    style="font-size: small;font-weight: 700;">@error('phone') Must be unique. @enderror</span>
+                                <input type="text" class="form-control" id="phone" onkeyup="duplicatePhone(this)" placeholder="Phone"
+                                    value="{{ $user->phone_no }}" name="phone">
+                                    <span class="text-danger mb-4 phone-error" id="phone-error"
+                                    style="font-size: small;"></span>
                             </div>
 
                             {{-- <div class="form-group">
@@ -60,63 +71,45 @@
                                 </div>
                                 
                             </div> --}}
-                           
 
-                            <button type="submit" class="btn btn-primary me-2">Submit</button>
+
+                            <button type="submit" class="btn btn-primary me-2" id="edit">Submit</button>
                             <a class="btn btn-light" href="{{ route('user.index') }}">Cancel</a>
                         </form>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 grid-margin stretch-card">
+            <div class="col-md-4 grid-margin sstretch-card">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">Status</h4>
                         <p class="card-description">
                             Edit Status
                         </p>
-                        <form class="forms-sample">
-                            <div class="form-group row">
-                                <label for="exampleInputUsername2" class="col-sm-4 col-form-label">Email</label>
-                                <div class="col-sm-8">
-                                    <input type="text" class="form-control" id="exampleInputUsername2"
-                                        placeholder="Username">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="exampleInputEmail2" class="col-sm-4 col-form-label">Email</label>
-                                <div class="col-sm-8">
-                                    <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Email">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="exampleInputMobile" class="col-sm-4 col-form-label">Mobile</label>
-                                <div class="col-sm-8">
-                                    <input type="text" class="form-control" id="exampleInputMobile"
-                                        placeholder="Mobile number">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="exampleInputPassword2" class="col-sm-4 col-form-label">Password</label>
-                                <div class="col-sm-8">
-                                    <input type="password" class="form-control" id="exampleInputPassword2"
-                                        placeholder="Password">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="exampleInputConfirmPassword2" class="col-sm-4 col-form-label">Re
-                                    Password</label>
-                                <div class="col-sm-8">
-                                    <input type="password" class="form-control" id="exampleInputConfirmPassword2"
-                                        placeholder="Password">
-                                </div>
-                            </div>
-                            <div class="form-check form-check-flat form-check-primary">
-                                <label class="form-check-label">
-                                    <input type="checkbox" class="form-check-input">
-                                    Remember me
-                                    <i class="input-helper"></i></label>
-                            </div>
+                        <form class="forms-sample" action="{{ route('user.status') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="user_id" value="{{ $user->id }}">
+                            <div class="form-group">
+                                <label>Account Status</label>
+                                <select class="form-control" name="status">
+                                  <option value="active" {{ ($user->is_verified=='active')?'selected':'' }}>Active</option>
+                                  <option value="pending" {{ ($user->is_verified=='pending')?'selected':'' }}>Pending</option>
+                                  
+                                  
+                                </select>
+                              </div>
+
+                              <div class="form-group">
+                                <label>Ban user </label>
+                                <select class="form-control" name="ban_status">
+                                  <option value="yes" {{ ($user->ban_time!=null)?'selected':'' }}>Yes</option>
+                                  <option value="no" {{ ($user->ban_time==null)?'selected':'' }}>No</option>
+                                  
+                                  
+                                </select>
+                              </div>
+                            
+                            
                             <button type="submit" class="btn btn-primary me-2">Submit</button>
                             <button class="btn btn-light">Cancel</button>
                         </form>
@@ -125,4 +118,109 @@
             </div>
         </div>
     </div>
+@endsection
+@section('extrajs')
+    <script>
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+    </script>
+    <script>
+        // Duplicate Email Checker
+        function duplicateEmail(element) {
+            var email = $(element).val();
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.checkemail') }}",
+                data: {
+                    email: email
+                },
+                dataType: "json",
+                success: function(res) {
+                    if (res.exists) {
+
+                        $('#email-error')
+                            .css('color', 'red')
+                            .html("This Email already exists!");
+                        $('#email-error')
+                            .prop('hidden', false);
+                        $('#edit').prop('disabled', true);
+
+                    } else {
+                        $('#email-error')
+                            .prop('hidden', true);
+                        $('#edit').prop('disabled', false);
+
+                    }
+                },
+                error: function(jqXHR, exception) {
+
+                }
+            });
+        }
+        function duplicatePhone(element) {
+            var phone = $(element).val();
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.checkemail') }}",
+                data: {
+                    phone: phone
+                },
+                dataType: "json",
+                success: function(res) {
+                    if (res.exists) {
+
+                        $('#phone-error')
+                            .css('color', 'red')
+                            .html("This phone no already exists!");
+                        $('#phone-error')
+                            .prop('hidden', false);
+                        $('#edit').prop('disabled', true);
+
+                    } else {
+                        $('#phone-error')
+                            .prop('hidden', true);
+                        $('#edit').prop('disabled', false);
+
+                    }
+                },
+                error: function(jqXHR, exception) {
+
+                }
+            });
+        }
+        function duplicateUsername(element) {
+            var username = $(element).val();
+            $.ajax({
+                type: "POST",
+                url: "{{ route('user.checkemail') }}",
+                data: {
+                    username: username
+                },
+                dataType: "json",
+                success: function(res) {
+                    if (res.exists) {
+
+                        $('#username-error')
+                            .css('color', 'red')
+                            .html("This username no already exists!");
+                        $('#username-error')
+                            .prop('hidden', false);
+                        $('#edit').prop('disabled', true);
+
+                    } else {
+                        $('#username-error')
+                            .prop('hidden', true);
+                        $('#edit').prop('disabled', false);
+
+                    }
+                },
+                error: function(jqXHR, exception) {
+
+                }
+            });
+        }
+    </script>
 @endsection

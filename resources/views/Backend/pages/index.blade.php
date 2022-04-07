@@ -351,3 +351,6 @@
             </div>
         </div>
     @endsection
+    @section('extrajs')
+        
+    @endsection

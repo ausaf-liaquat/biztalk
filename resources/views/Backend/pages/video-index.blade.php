@@ -5,34 +5,40 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Users Management</h4>
+                        <h4 class="card-title">Videos Management</h4>
                         {{-- <p class="card-description">
                             Add class <code>.table-striped</code>
                         </p> --}}
                         <div class="table-responsive">
-                            <table class="table table-striped" id="user_table">
+                            <table class="table table-striped" id="video_table">
                                 <thead>
                                     <tr>
                                         <th>
-                                            User
+                                            Video Title
                                         </th>
                                         <th>
-                                            Name
+                                            Video Description
                                         </th>
                                         <th>
-                                            Username
+                                            Video
                                         </th>
                                         <th>
-                                            Phone no
+                                            Investment Required
                                         </th>
                                         <th>
-                                            Email
+                                            Category
                                         </th>
                                         <th>
-                                            Status
+                                            Is Video Approved?
                                         </th>
                                         <th>
-                                            Joined Date
+                                            Is Video Flagged?
+                                        </th>
+                                        <th>
+                                            Posted by user
+                                        </th>
+                                        <th>
+                                            Posted at
                                         </th>
                                         <th>
                                             Actions
@@ -52,45 +58,44 @@
         </div>
     </div>
 @endsection
-
 @section('extrajs')
     <script>
         $(document).ready(function() {
 
-            var table = $('#user_table').DataTable({
+            var table = $('#video_table').DataTable({
 
                 processing: true,
                 serverSide: true,
                 pageLength: 25,
                 select: false,
                 ajax: {
-                    url: "{{ route('user.data') }}",
+                    url: "{{ route('video.data') }}",
 
                 },
                 columns: [
 
                     {
-                        data: 'user',
-                        name: 'user',
+                        data: 'video_title',
+                        name: 'video_title',
                     },
                     {
-                        data: 'name',
-                        name: 'name',
+                        data: 'video_description',
+                        name: 'video_description',
 
                     },
                     {
-                        data: 'username',
-                        name: 'username',
+                        data: 'video',
+                        name: 'video',
 
                     },
                     {
-                        data: 'phone',
-                        name: 'phone',
+                        data: 'investment_req',
+                        name: 'investment_req',
 
                     },
                     {
-                        data: 'email',
-                        name: 'email',
+                        data: 'video_category',
+                        name: 'video_category',
 
                     },
                     {
@@ -99,8 +104,18 @@
 
                     },
                     {
-                        data: 'joineddate',
-                        name: 'joineddate',
+                        data: 'flagged_video',
+                        name: 'flagged_video',
+
+                    },
+                    {
+                        data: 'user',
+                        name: 'user',
+
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
 
                     },
                     {
@@ -122,48 +137,5 @@
 
 
         });
-    </script>
-    <script>
-        function deleteUser(e) {
-            // e.preventDefault();
-
-            var id = $(e).data("id");
-
-
-            Swal.fire({
-                title: "Are you sure?",
-                text: "Once deleted, you will not be able to recover",
-                icon: "warning",
-                showCancelButton: true,
-
-                confirmButtonText: "Yes, delete it!",
-            }).then((result) => {
-                if (result.value) {
-                    $.ajax({
-                        type: "GET",
-                        url: '{{ route('user.delete') }}',
-                        data: {
-                            id: id
-                        },
-                        success: function(data) {
-                            if ($.isEmptyObject(data.error)) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'User deleted successfully',
-                                    showConfirmButton: true,
-                                    timer: 2500
-                                }).then((result) => {
-                                    // Reload the Page
-                                    location.reload();
-                                });
-                            }
-                        }
-                    });
-
-                }
-            });
-
-
-        };
     </script>
 @endsection

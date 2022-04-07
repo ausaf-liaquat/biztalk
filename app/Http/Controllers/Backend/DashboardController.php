@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Video;
 use DataTables;
 use Illuminate\Http\Request;
 
@@ -31,13 +32,11 @@ class DashboardController extends Controller
                 ->addColumn('user', function ($row) {
                     if ($row->profile_image == null) {
                         $user = "<img src='" . asset('assets/images/faces/face1.jpg') . "' style='border-radius: 5px;' alt='image' />";
-                    return $user; 
+                        return $user;
                     } else {
-                       $user = "<img src='" . asset('uploads/avtars/' . $row->profile_image) . "' style='border-radius: 5px;' alt='image' />";
-                    return $user; 
+                        $user = "<img src='" . asset('uploads/avtars/' . $row->profile_image) . "' style='border-radius: 5px;' alt='image' />";
+                        return $user;
                     }
-                    
-                    
 
                 })
                 ->addColumn('name', function ($row) {
@@ -62,7 +61,7 @@ class DashboardController extends Controller
                     } elseif ($row->is_verified == "active") {
                         $status = "<label class='badge badge-success'>Active</label>";
                     } else {
-                        $status="<label class='badge badge-danger'>".$row->is_verified."</label>";
+                        $status = "<label class='badge badge-danger'>" . $row->is_verified . "</label>";
                     }
 
                     return $status;
@@ -77,7 +76,7 @@ class DashboardController extends Controller
 
                     return $action = "<a class='btn btn-primary btn-rounded btn-icon action-btn' href='" . route('user.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
-                    <a class='btn btn-danger btn-rounded btn-icon action-btn'>
+                    <a class='btn btn-danger btn-rounded btn-icon action-btn' id='delete' onclick='deleteUser(this)' data-id='" . $row->id . "'>
                     Delete <i class='ti-trash btn-icon-append icons-table'></i></a>
                     ";
 
@@ -90,26 +89,196 @@ class DashboardController extends Controller
     }
     public function useredit($id)
     {
-        $user= User::find($id);
-        return view('Backend.pages.edit-user',compact('user'));
+        $user = User::find($id);
+        return view('Backend.pages.edit-user', compact('user'));
     }
     public function userupdate(Request $request)
     {
-        $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'username'=>'required|unique:users,username',
-            'email'=>'required|unique:users,email',
-            'phone'=>'required|unique:users,phone_no'
-        ]);
+        // if ($request->get('first_name')!=null||$request->get('last_name')!=null || $request->get('email')!=null||$request->get('username')!=null||$request->get('phone_no')!=null) {
         $user = User::find($request->id)->update([
-            'first_name'=>$request->get('first_name'),
-            'last_name'=>$request->get('last_name'),
-            'username'=>$request->get('username'),
-            'email'=>$request->get('email'),
-            'phone_no'=>$request->get('phone'),
+            'first_name' => $request->get('first_name'),
+            'last_name' => $request->get('last_name'),
+            'username' => $request->get('username'),
+            'email' => $request->get('email'),
+            'phone_no' => $request->get('phone'),
+        ]);
+        // }
+
+        return redirect()->route('user.index')->with('success', 'User details updated');
+    }
+    public function useremail(Request $request)
+    {
+        if ($request->input('email')) {
+            $email = $request->input('email');
+            $isExists = User::where('email', $email)->first();
+
+            if ($isExists) {
+                return response()->json(array("exists" => true));
+            } else {
+                return response()->json(array("exists" => false));
+            }
+
+        } elseif ($request->input('phone')) {
+            $phone = $request->input('phone');
+            $isExists = User::where('phone_no', $phone)->first();
+
+            if ($isExists) {
+                return response()->json(array("exists" => true));
+            } else {
+                return response()->json(array("exists" => false));
+            }
+        } elseif ($request->input('username')) {
+            $username = $request->input('username');
+            $isExists = User::where('username', $username)->first();
+
+            if ($isExists) {
+                return response()->json(array("exists" => true));
+            } else {
+                return response()->json(array("exists" => false));
+            }
+        }
+
+    }
+    public function userstatus(Request $request)
+    {
+        // dd($request->get('ban_status'));
+        $user = User::find($request->user_id);
+
+        $user->update([
+            'is_verified' => $request->get('status'),
         ]);
 
-        return redirect()->route('user.index')->with('success','User details updated');
+        if ($request->get('ban_status') == 'yes') {
+            $user->ban_time = now();
+            $user->update();
+        } elseif ($request->get('ban_status') == 'no') {
+            $user->ban_time = null;
+            $user->update();
+        }
+
+        return redirect()->route('user.index')->with('success', 'User status updated');
+    }
+    public function userdelete(Request $request)
+    {
+        User::find($request->get('id'))->delete();
+        return response()->json(200);
+    }
+    public function videos()
+    {
+        return view('Backend.pages.video-index');
+    }
+    public function videosdata(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Video::latest()->get();
+            return DataTables::of($data)
+            // ->addIndexColumn()
+                ->addColumn('video_title', function ($row) {
+                    $title = $row->video_title;
+                    return $title;
+                })
+                ->addColumn('video_description', function ($row) {
+                    $video_description = $row->video_description;
+                    return $video_description;
+                })
+                ->addColumn('video', function ($row) {
+                    if ($row->video_name == null) {
+                        $video = "-";
+                        return $video;
+                    } else {
+                        $video = " <video
+                        id='my-video'
+                        class='video-js'
+                        controls
+                        preload='auto'
+                        width='640'
+                        height='264'
+                        poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'
+                        data-setup='{}'
+                        style='border-radius: 10px;'
+                      >
+                        <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
+
+
+                      </video>
+                    ";
+                        return $video;
+                    }
+
+                })
+
+                ->addColumn('investment_req', function ($row) {
+                    if ($row->investment_req == 0) {
+                        $investment_req = "No";
+                    } else {
+                        $investment_req = "Yes";
+                    }
+
+                    return $investment_req;
+                })
+                ->addColumn('video_category', function ($row) {
+                    if ($row->video_category != null) {
+                        $video_category = $row->video_category;
+
+                    } else {
+                        $video_category = "-";
+                    }
+
+                    return $video_category;
+                })
+                ->addColumn('status', function ($row) {
+                    if ($row->is_approved == 0) {
+                        $status = "<label class='badge badge-warning'>No</label>";
+                    } else {
+                        $status = "<label class='badge badge-success'>Yes</label>";
+                    }
+
+                    return $status;
+                })
+                ->addColumn('flagged_video', function ($row) {
+                    if ($row->is_flagged == 0) {
+                        $status = "<label class='badge badge-warning'>No</label>";
+                    } elseif($row->is_flagged == 1) {
+                        $status = "<label class='badge badge-success'>Yes</label>";
+                    }
+
+                    return $status;
+                })
+                ->addColumn('user', function ($row) {
+
+                    $user = '@' . $row->users->username;
+
+                    return $user;
+                })
+                ->addColumn('created_at', function ($row) {
+                    $created_at = $row->created_at->format('d/m/Y');
+                    return $created_at;
+
+                })
+
+                ->addColumn('action', function ($row) {
+
+                    return $action = "<a class='btn btn-primary btn-rounded btn-icon action-btn' href='" . route('video.edit', ['id' => $row->id]) . "'>
+                    Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
+
+                })
+
+                ->rawColumns(['video_title', 'video_description', 'video', 'investment_req', 'video_category', 'status','flagged_video', 'user', 'created_at', 'action'])
+                ->make(true);
+
+        }
+
+    }
+    public function videoedit($id)
+    {
+        $video = Video::find($id);
+        return view('Backend.pages.edit-video',compact('video'));
+    }
+    public function videostatus(Request $request)
+    {
+        $video = Video::find($request->video_id);
+        $video->is_approved = $request->get('is_approved');
+        $video->update();
+        return redirect()->route('video.index')->with('success', 'User status updated');
     }
 }

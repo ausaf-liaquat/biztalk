@@ -10,10 +10,12 @@
     <!-- plugins:css -->
     <link rel="stylesheet" href="{{ asset('assets/vendors/feather/feather.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    
     <link rel="stylesheet" href="{{ asset('assets/vendors/ti-icons/css/themify-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/typicons/typicons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/simple-line-icons/css/simple-line-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/css/vendor.bundle.base.css') }}">
+    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
     <!-- endinject -->
     <!-- Plugin css for this page -->
     {{-- <link rel="stylesheet" href="{{ asset('assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css') }}"> --}}
@@ -26,9 +28,13 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/select/1.3.3/css/select.bootstrap5.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap5.min.css">
-
+    <link rel="stylesheet" href="{{ asset('assets/vendors/select2/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/index.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" integrity="sha512-vKMx8UnXk60zUwyUnUPM3HbQo8QfmNx7+ltw8Pm5zLusl1XIfwcxo8DbWCqMGKaWeNxWA8yrx5v3SaVpMvR3CA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.0.4/sweetalert2.min.css"
+        integrity="sha512-iuMkf48pM/TdH5DQkNPLWPLIUsVCncQEpuxgcMq/oDmJepdFcu48Wy4MwXggN9WFb4L6rpXQf5YJE/+OXkM1Lw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style type="text/css">
         i.icons {
             display: inline-block;
@@ -180,11 +186,26 @@
     <script src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
     <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
     <script src="{{ asset('assets/js/file-upload.js') }}"></script>
+    <script src="{{ asset('assets/js/select2.js') }}"></script>
+    <script src="{{ asset('assets/vendors/select2/select2.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('assets/vendors/select2-bootstrap-theme/select2-bootstrap.min.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.0.4/sweetalert2.all.min.js"
+        integrity="sha512-niNQgNQ4mHtOdt//YjERRRbsmlc9aH+1c+fIQ9bQWD5kByzpE10EBDOhyV/n+anhaLW9GN4Dalu/z9QrXBvDUQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <script src="https://vjs.zencdn.net/7.18.1/video.min.js"></script>
+    
     @if (Session::has('success'))
         <script type="text/javascript">
             toastr.success("{{ Session::get('success') }}");
+
+        </script>
+    @endif
+    @if (Session::has('error'))
+        <script type="text/javascript">
+            toastr.error("{{ Session::get('error') }}");
 
         </script>
     @endif

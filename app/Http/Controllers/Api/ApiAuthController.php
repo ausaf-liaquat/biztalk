@@ -31,12 +31,12 @@ class ApiAuthController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|confirmed|min:8|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
-            'phone_no' => 'required|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
+            'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
             'location' => 'required',
             'country' => 'required',
-            //   'mac_id' => 'required',
+           
         ]);
 
         //User Registration

@@ -62,6 +62,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/data',[DashboardController::class,'userdata'])->name('user.data');
     Route::get('/user/edit/{id}',[DashboardController::class,'useredit'])->name('user.edit');
     Route::post('/user/update',[DashboardController::class,'userupdate'])->name('user.update');
+    Route::post('/user/status',[DashboardController::class,'userstatus'])->name('user.status');
+    Route::post('/user/check/email',[DashboardController::class,'useremail'])->name('user.checkemail');
+    Route::get('/user/delete',[DashboardController::class,'userdelete'])->name('user.delete');
+
+    Route::get('/videos',[DashboardController::class,'videos'])->name('video.index');
+    Route::get('/videos/data',[DashboardController::class,'videosdata'])->name('video.data');
+    Route::get('/videos/edit/{id}',[DashboardController::class,'videoedit'])->name('video.edit');
+    Route::post('/video/status',[DashboardController::class,'videostatus'])->name('video.status');
 
 
 
