@@ -92,7 +92,8 @@ class ApiAuthController extends Controller
 
         $user = Auth::user();
         // if ($user->is_verified !== 'active') {
-        //     return $this->error('Your account has been inactive/suspended by our admin, please contact support for further details', 401,[]);
+        //     return $this->error([
+        //     ], 'Your account has been inactive/suspended by our admin, please contact support for further details', 401);
         // }
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
