@@ -36,7 +36,7 @@ class ApiAuthController extends Controller
             'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
             'location' => 'required',
             'country' => 'required',
-
+           
         ]);
 
         //User Registration
@@ -66,11 +66,13 @@ class ApiAuthController extends Controller
         $user->notify(new SendOtp());
 
         // Twilio Package for sending Activation Code
+        if($user->phone_no != ''){
         $account_sid = config('services.twilio.sid');
         $auth_token = config('services.twilio.token');
         $twilio_number = config('services.twilio.number');
         $client = new Client($account_sid, $auth_token);
         $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
+        }
 
         return $this->success([
             'token' => $accessToken,
@@ -89,10 +91,9 @@ class ApiAuthController extends Controller
         }
 
         $user = Auth::user();
-        if ($user->is_verified !== 'active') {
-            return $this->error([
-            ], 'Your account has been inactive/suspended by our admin, please contact support for further details', 401);
-        }
+        // if ($user->is_verified !== 'active') {
+        //     return $this->error('Your account has been inactive/suspended by our admin, please contact support for further details', 401,[]);
+        // }
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
         $tokenid = $token->accessToken->id;
@@ -171,7 +172,7 @@ class ApiAuthController extends Controller
     {
         Auth::user()->tokens()->delete();
 
-        return $this->success([], "Token Revoked", 200);
+        return $this->success([],"Token Revoked",200);
     }
     public function usernameValidation(Request $request)
     {
@@ -183,9 +184,9 @@ class ApiAuthController extends Controller
         User::where('username', $user_name);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
         if (User::where('username', $user_name)->count() > 0) {
-            return $this->error("This Username already exists.", 422, [$user_name]);
+            return $this->error("This Username already exists.", 422,[$user_name]);
         } else {
-            return $this->success([$user_name], "valid username", 200);
+            return $this->success([$user_name],"valid username", 200);
         }
 
     }
@@ -201,7 +202,7 @@ class ApiAuthController extends Controller
         if (User::where('email', $email)->count() > 0) {
             return $this->error("This Email already exists.", 422);
         } else {
-            return $this->success([], "valid email", 200);
+            return $this->success([],"valid email", 200);
         }
 
     }
@@ -217,7 +218,7 @@ class ApiAuthController extends Controller
         if (User::where('phone_no', $phone)->count() > 0) {
             return $this->error("This Phone no already exists.", 422);
         } else {
-            return $this->success([], "valid phone no", 200);
+            return $this->success([],"valid phone no", 200);
         }
 
     }
@@ -245,7 +246,7 @@ class ApiAuthController extends Controller
                     $User->profile_image = $imageName;
                     $User->save();
 
-                    return $this->success([], "Profile updated", 200);
+                    return $this->success([],"Profile updated", 200);
                 }
 
             } catch (Exception $e) {
@@ -261,7 +262,7 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
-            return $this->success([$profile_image], "Profile Image", 200);
+            return $this->success([$profile_image],"Profile Image", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -303,7 +304,7 @@ class ApiAuthController extends Controller
                 return $this->error($e->getMessage(), 500);
             }
 
-            return $this->success([], 'video uploaded', 200);
+            return $this->success([],'video uploaded', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -319,7 +320,7 @@ class ApiAuthController extends Controller
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return $this->success([$v_url], "Videos url", 200);
+            return $this->success([ $v_url],"Videos url", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -329,14 +330,14 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-
+            
             $videos = Video::latest()->get();
             $v_url = array();
             foreach ($videos as $i) {
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return $this->success([$v_url], 'Videos list', 200);
+            return $this->success([$v_url],'Videos list', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
