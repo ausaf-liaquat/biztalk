@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ApiAuthController;
+use App\Http\Controllers\Api\CommentController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -34,13 +35,17 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
     Route::group(['middleware' => ['auth:sanctum','apiverified']], function () {
 
-        Route::get('/user', [ApiAuthController::class, 'userinfo']);
+        Route::post('/user', [ApiAuthController::class, 'userinfo']);
         Route::post('update/profile-image', [ApiAuthController::class, 'update_profileImage']);
         Route::get('/profile/img', [ApiAuthController::class, 'profile_img_url']);
 
         Route::post('/post/video', [ApiAuthController::class, 'post_video']);
         Route::get('/video/url', [ApiAuthController::class, 'video_url']);
-        Route::get('/videos', [ApiAuthController::class, 'videos_list']);
+        Route::post('/videos', [ApiAuthController::class, 'videos_list']);
+
+        Route::post('/comment/store', [CommentController::class, 'store']);
+        Route::post('/reply/store', [CommentController::class, 'replyStore']);
+        Route::get('/video/comment/{id}', [ApiAuthController::class, 'video_comment']);
     });
 
 

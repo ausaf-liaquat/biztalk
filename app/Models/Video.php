@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-
+use App\Models\Comment;
 class Video extends Model
 {
     use HasFactory;
@@ -32,5 +32,10 @@ class Video extends Model
     public function users()
     {
         return $this->belongsTo(User::class,'user_id');
+    }
+
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id');
     }
 }

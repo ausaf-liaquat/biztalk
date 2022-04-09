@@ -99,6 +99,18 @@ class Handler extends ExceptionHandler
             }
             // return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));
         }
+        if ($exception instanceof \Exception) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => Helper::ApiFailedStatus(), 'message' => $exception->getMessage()], 500);
+            }
+            // return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));
+        }
+        if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => Helper::ApiFailedStatus(), 'message' => $exception->getMessage()], 500);
+            }
+            // return redirect()->back()->with('error','Class not Found ' . str_replace('App\\', '', $exception->getMessage()));
+        }
         return parent::render($request, $exception);
     }
 }

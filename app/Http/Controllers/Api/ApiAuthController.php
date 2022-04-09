@@ -335,12 +335,41 @@ class ApiAuthController extends Controller
             $videos = Video::latest()->get();
             $v_url = array();
             foreach ($videos as $i) {
-                $v_url[] = asset('uploads/videos/' . $i->video_name);
+                $v_url[] = [
+                    'video_id'=>$i->id,
+                    'title'=>$i->video_title,
+                    'description'=>$i->video_description,
+                    'investment_req'=>$i->investment_req,
+                    'allow_comment'=>$i->allow_comment,
+                    'user_id'=>$i->users->id,
+                    'username'=>$i->users->username,
+                    'user_name'=>$i->users->first_name.' '.$i->users->last_name,
+                    'total_comments'=>$i->comments->count(),
+                    'urls'=>asset('uploads/videos/' . $i->video_name)
+                ];
             }
 
             return $this->success([$v_url],'Videos list', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
+    }
+
+    public function video_comment($id)
+    {
+        $video = Video::find($id);
+        if ($video != null) {
+            $video->whereHas('comments', function ($query) {
+                $query->where('user_id', Auth::user()->id);
+            });
+            // $replies=array();
+            // foreach ($video->comments as $comment) {
+            //    $replies[]= $comment->replies;
+            // }
+            return $this->success(['video_comments'=>$video->comments],'video with comment');
+        } else {
+            return $this->error('No video found',404);
+        }
+        
     }
 }
