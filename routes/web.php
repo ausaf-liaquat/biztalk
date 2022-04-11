@@ -71,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/videos/edit/{id}',[DashboardController::class,'videoedit'])->name('video.edit');
     Route::post('/video/status',[DashboardController::class,'videostatus'])->name('video.status');
 
+    Route::get('/banners/show',[DashboardController::class,'banners'])->name('banners.index');
+    Route::post('/banner/store',[DashboardController::class,'bannerstore'])->name('banners.store');
 
 
 });

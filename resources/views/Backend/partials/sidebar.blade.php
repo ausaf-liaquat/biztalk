@@ -19,7 +19,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="{{ route('banners.index') }}">
                 <i class="mdi mdi-image-area menu-icon"></i>
                 <span class="menu-title">Banners</span>
             </a>

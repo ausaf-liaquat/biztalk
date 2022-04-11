@@ -38,4 +38,9 @@ class Video extends Model
     {
         return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id');
     }
+
+    public function hashtags()
+    {
+        return $this->belongsToMany(Hashtag::class,'hashtag_video','video_id','hashtag_id');
+    }
 }

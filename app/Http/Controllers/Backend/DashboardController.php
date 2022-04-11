@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Banner;
 use App\Models\User;
 use App\Models\Video;
 use DataTables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -238,7 +240,7 @@ class DashboardController extends Controller
                 ->addColumn('flagged_video', function ($row) {
                     if ($row->is_flagged == 0) {
                         $status = "<label class='badge badge-warning'>No</label>";
-                    } elseif($row->is_flagged == 1) {
+                    } elseif ($row->is_flagged == 1) {
                         $status = "<label class='badge badge-success'>Yes</label>";
                     }
 
@@ -263,7 +265,7 @@ class DashboardController extends Controller
 
                 })
 
-                ->rawColumns(['video_title', 'video_description', 'video', 'investment_req', 'video_category', 'status','flagged_video', 'user', 'created_at', 'action'])
+                ->rawColumns(['video_title', 'video_description', 'video', 'investment_req', 'video_category', 'status', 'flagged_video', 'user', 'created_at', 'action'])
                 ->make(true);
 
         }
@@ -272,7 +274,7 @@ class DashboardController extends Controller
     public function videoedit($id)
     {
         $video = Video::find($id);
-        return view('Backend.pages.edit-video',compact('video'));
+        return view('Backend.pages.edit-video', compact('video'));
     }
     public function videostatus(Request $request)
     {
@@ -280,5 +282,34 @@ class DashboardController extends Controller
         $video->is_approved = $request->get('is_approved');
         $video->update();
         return redirect()->route('video.index')->with('success', 'Video status updated');
+    }
+    public function banners()
+    {
+        $banners = Banner::first();
+        return view('Backend.pages.banner', compact('banners'));
+    }
+    public function bannerstore(Request $request)
+    {
+
+        if (request()->hasFile('banners')) {
+            $arrbanners = array();
+            $arrbanners = request()->file('banners');
+            // dd($arrbanners);
+            foreach ($arrbanners as $banner) {
+                $banners_name = rand(0000, 9999) . '_' . $banner->getClientOriginalName();
+                $img_data = file_get_contents($banner);
+                // dd($file);
+                Storage::disk('public')->put('banners/' . $banners_name, $img_data);
+                // $banner->move(public_path().'/uploads/banners/', $banners_name);
+                // $banner->store('public/uploads/banners/'. $banners_name, '');
+                $data[] = $banners_name;
+            }
+            $banner = Banner::first();
+            $banner->image_name = $data;
+            $banner->save();
+
+        }
+
+        return redirect()->back()->with('success', 'Banners updated');
     }
 }

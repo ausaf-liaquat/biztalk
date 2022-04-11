@@ -282,7 +282,6 @@ class ApiAuthController extends Controller
                         'is_approved' => $request->get('is_approved'),
                         'video_title' => $request->get('video_title'),
                         'video_description' => $request->get('video_description'),
-                        'hashtags' => $request->get('hashtags'),
                         'video_category' => $request->get('video_category'),
                         'investment_req' => $request->get('investment_req'),
                         'allow_comment' => $request->get('allow_comment'),
@@ -300,6 +299,15 @@ class ApiAuthController extends Controller
                     Storage::disk('public')->put('videos/' . $filename, $data);
                     $video->video_name = $filename;
                     $video->save();
+
+                    $hashtag = Helper::hashtags($request->get('video_description')); 
+
+                    Hashtag::whereIn('name',$hashtag);
+
+                    
+
+
+
                 }
             } catch (Exception $e) {
                 return $this->error($e->getMessage(), 500);
