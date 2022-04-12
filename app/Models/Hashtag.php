@@ -18,6 +18,6 @@ class Hashtag extends Model
 
     public function videos()
     {
-        return $this->belongsToMany(Video::class,'hashtag_video','hashtag_id','video_id');
+        return $this->belongsToMany(Video::class, 'hashtag_video', 'hashtag_id', 'video_id');
     }
 }

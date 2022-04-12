@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Comment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\Comment;
+
 class Video extends Model
 {
     use HasFactory;
@@ -31,7 +32,7 @@ class Video extends Model
 
     public function users()
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function comments()
@@ -41,6 +42,6 @@ class Video extends Model
 
     public function hashtags()
     {
-        return $this->belongsToMany(Hashtag::class,'hashtag_video','video_id','hashtag_id');
+        return $this->belongsToMany(Hashtag::class, 'hashtag_video', 'video_id', 'hashtag_id');
     }
 }

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
@@ -24,7 +25,7 @@ class UserFactory extends Factory
             'last_name' => 'Admin',
             'username' => 'superadmin',
             'email' => 'admin@biztalk.com',
-            'password' => Hash::make('admin123'), // admin123 
+            'password' => Hash::make('admin123'), // admin123
         ];
     }
 

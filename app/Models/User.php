@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Video;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\Video;
 
 class User extends Authenticatable
 {
@@ -53,7 +52,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime','ban_time'=>'datetime'
+        'email_verified_at' => 'datetime', 'ban_time' => 'datetime',
     ];
 
     public function generateOTP()
@@ -63,15 +62,15 @@ class User extends Authenticatable
         // $this->two_factor_expires_at = now()->addMinutes(10);
         $this->save();
     }
-   
+
     public function resetOTP()
     {
         $this->timestamps = false;
         $this->otp = null;
-       
+
         $this->save();
     }
-   
+
     public function videos()
     {
         return $this->belongsTo(Video::class);

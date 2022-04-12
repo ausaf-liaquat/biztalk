@@ -40,8 +40,8 @@ class Helper
 
     public static function hashtags($string)
     {
-
-        preg_match_all('/#(\w+)/', $string, $matches);
+        if ($string != null) {
+          preg_match_all('/#(\w+)/', $string, $matches);
 
         foreach ($matches[1] as $match) {
 
@@ -49,7 +49,9 @@ class Helper
 
         }
 
-        return (array) $keywords;
+        return (array) $keywords;  
+        }
+        
 
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Hashtag;
 use App\Models\User;
 use App\Models\Video;
 use App\Notifications\SendOtp;
@@ -36,7 +37,7 @@ class ApiAuthController extends Controller
             'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
             'location' => 'required',
             'country' => 'required',
-           
+
         ]);
 
         //User Registration
@@ -66,12 +67,12 @@ class ApiAuthController extends Controller
         $user->notify(new SendOtp());
 
         // Twilio Package for sending Activation Code
-        if($user->phone_no != ''){
-        $account_sid = config('services.twilio.sid');
-        $auth_token = config('services.twilio.token');
-        $twilio_number = config('services.twilio.number');
-        $client = new Client($account_sid, $auth_token);
-        $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
+        if ($user->phone_no != '') {
+            $account_sid = config('services.twilio.sid');
+            $auth_token = config('services.twilio.token');
+            $twilio_number = config('services.twilio.number');
+            $client = new Client($account_sid, $auth_token);
+            $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
         }
 
         return $this->success([
@@ -81,9 +82,9 @@ class ApiAuthController extends Controller
     public function login(Request $request)
     {
         $attributes = $request->validate([
-            'email' => 'required|string|email|',
+            // 'email' => 'required|string|email|',
+            'phone_no' => 'required',
             'password' => 'required',
-
         ]);
 
         if (!Auth::attempt($attributes)) {
@@ -91,10 +92,7 @@ class ApiAuthController extends Controller
         }
 
         $user = Auth::user();
-        // if ($user->is_verified !== 'active') {
-        //     return $this->error([
-        //     ], 'Your account has been inactive/suspended by our admin, please contact support for further details', 401);
-        // }
+
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
         $tokenid = $token->accessToken->id;
@@ -173,7 +171,7 @@ class ApiAuthController extends Controller
     {
         Auth::user()->tokens()->delete();
 
-        return $this->success([],"Token Revoked",200);
+        return $this->success([], "Token Revoked", 200);
     }
     public function usernameValidation(Request $request)
     {
@@ -185,9 +183,9 @@ class ApiAuthController extends Controller
         User::where('username', $user_name);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
         if (User::where('username', $user_name)->count() > 0) {
-            return $this->error("This Username already exists.", 422,[$user_name]);
+            return $this->error("This Username already exists.", 422, [$user_name]);
         } else {
-            return $this->success([$user_name],"valid username", 200);
+            return $this->success([$user_name], "valid username", 200);
         }
 
     }
@@ -203,7 +201,7 @@ class ApiAuthController extends Controller
         if (User::where('email', $email)->count() > 0) {
             return $this->error("This Email already exists.", 422);
         } else {
-            return $this->success([],"valid email", 200);
+            return $this->success([], "valid email", 200);
         }
 
     }
@@ -219,7 +217,7 @@ class ApiAuthController extends Controller
         if (User::where('phone_no', $phone)->count() > 0) {
             return $this->error("This Phone no already exists.", 422);
         } else {
-            return $this->success([],"valid phone no", 200);
+            return $this->success([], "valid phone no", 200);
         }
 
     }
@@ -247,7 +245,7 @@ class ApiAuthController extends Controller
                     $User->profile_image = $imageName;
                     $User->save();
 
-                    return $this->success([],"Profile updated", 200);
+                    return $this->success([], "Profile updated", 200);
                 }
 
             } catch (Exception $e) {
@@ -263,7 +261,7 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
-            return $this->success([$profile_image],"Profile Image", 200);
+            return $this->success([$profile_image], "Profile Image", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -300,20 +298,38 @@ class ApiAuthController extends Controller
                     $video->video_name = $filename;
                     $video->save();
 
-                    $hashtag = Helper::hashtags($request->get('video_description')); 
+                    $hashtag = Helper::hashtags($request->get('video_description'));
 
-                    Hashtag::whereIn('name',$hashtag);
+                    $checkhashtag = Hashtag::pluck('name')->toArray();
 
-                    
+                    if ($request->get('video_description') != null) {
+                        if (count($hashtag) > 0) {
 
+                            $video->hashtags = $hashtag;
+                            $video->save();
 
+                            $tags = array_diff($hashtag, $checkhashtag);
+                            if (count($tags) > 0) {
+                                $tagsid = array();
+                                foreach ($tags as $key) {
+                                    $tagsid[] = Hashtag::create([
+                                        'name' => $key,
+                                    ])->id;
+                                }
+                            }
+                            $ids = Hashtag::whereIn('name', $hashtag)->pluck('id')->toArray();
+                            $gettags = Hashtag::find($ids);
+                            $video->hashtags()->attach($gettags);
+                        }
+
+                    }
 
                 }
             } catch (Exception $e) {
                 return $this->error($e->getMessage(), 500);
             }
-
-            return $this->success([],'video uploaded', 200);
+            // Hashtag::with('videos')->get();
+            return $this->success([], 'video uploaded', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -329,7 +345,7 @@ class ApiAuthController extends Controller
                 $v_url[] = asset('uploads/videos/' . $i->video_name);
             }
 
-            return $this->success([ $v_url],"Videos url", 200);
+            return $this->success([$v_url], "Videos url", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -339,25 +355,25 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-            
+
             $videos = Video::latest()->get();
             $v_url = array();
             foreach ($videos as $i) {
                 $v_url[] = [
-                    'video_id'=>$i->id,
-                    'title'=>$i->video_title,
-                    'description'=>$i->video_description,
-                    'investment_req'=>$i->investment_req,
-                    'allow_comment'=>$i->allow_comment,
-                    'user_id'=>$i->users->id,
-                    'username'=>$i->users->username,
-                    'user_name'=>$i->users->first_name.' '.$i->users->last_name,
-                    'total_comments'=>$i->comments->count(),
-                    'urls'=>asset('uploads/videos/' . $i->video_name)
+                    'video_id' => $i->id,
+                    'title' => $i->video_title,
+                    'description' => $i->video_description,
+                    'investment_req' => $i->investment_req,
+                    'allow_comment' => $i->allow_comment,
+                    'user_id' => $i->users->id,
+                    'username' => $i->users->username,
+                    'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
+                    'total_comments' => $i->comments->count(),
+                    'urls' => asset('uploads/videos/' . $i->video_name),
                 ];
             }
 
-            return $this->success([$v_url],'Videos list', 200);
+            return $this->success([$v_url], 'Videos list', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -374,10 +390,11 @@ class ApiAuthController extends Controller
             // foreach ($video->comments as $comment) {
             //    $replies[]= $comment->replies;
             // }
-            return $this->success(['video_comments'=>$video->comments],'video with comment');
+            return $this->success(['video_comments' => $video->comments], 'video with comment');
         } else {
-            return $this->error('No video found',404);
+            return $this->error('No video found', 404);
         }
-        
+
     }
+
 }
