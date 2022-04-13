@@ -34,6 +34,7 @@ class User extends Authenticatable
         'total_likes',
         'otp',
         'is_verified',
+        'fb_id'
     ];
 
     /**
@@ -74,5 +75,9 @@ class User extends Authenticatable
     public function videos()
     {
         return $this->belongsTo(Video::class);
+    }
+    public function providers()
+    {
+        return $this->hasMany(Provider::class, 'user_id', 'id');
     }
 }

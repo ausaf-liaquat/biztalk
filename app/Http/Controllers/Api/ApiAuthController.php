@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Socialite\Facades\Socialite;
 use Twilio\Rest\Client;
 
 class ApiAuthController extends Controller
@@ -395,6 +396,88 @@ class ApiAuthController extends Controller
             return $this->error('No video found', 404);
         }
 
+    }
+    /**
+     * Redirect the user to the Provider authentication page.
+     *
+     * @param $provider
+     * @return JsonResponse
+     */
+    public function redirectToProvider(Request $request, $provider)
+    {
+        $validated = $this->validateProvider($provider);
+        if (!is_null($validated)) {
+            return $validated;
+        }
+
+        return Socialite::driver($provider)->with(['state' => 'event_slug=' . $request->get('mac_id')])->stateless()->redirect();
+    }
+    /**
+     * Obtain the user information from Provider.
+     *
+     * @param $provider
+     * @return JsonResponse
+     */
+    public function handleProviderCallback(Request $request, $provider)
+    {
+        $validated = $this->validateProvider($provider);
+        if (!is_null($validated)) {
+            return $validated;
+        }
+        try {
+            $user = Socialite::driver($provider)->stateless()->user();
+        } catch (ClientException $exception) {
+
+            return $this->error("Invalid credentials provided.", 422, []);
+        }
+
+        $name = explode(" ", $user->getName());
+        $first_name = $name[0];
+        $last_name = $name[1];
+        $userCreated = User::firstOrCreate(
+            [
+                'email' => $user->getEmail(),
+            ],
+            [
+                'email_verified_at' => now(),
+                'first_name' => $first_name,
+                'last_name' => $last_name,
+                'is_verified' => 'active',
+            ]
+        );
+        $userCreated->providers()->updateOrCreate(
+            [
+                'provider' => $provider,
+                'provider_id' => $user->getId(),
+            ],
+            [
+                'avatar' => $user->getAvatar(),
+            ]
+        );
+
+        $state = $request->input('state');
+        parse_str($state, $result);
+
+        $token = $userCreated->createToken('APIToken');
+        $accessToken = $token->plainTextToken;
+        $tokenid = $token->accessToken->id;
+        DB::table('personal_access_tokens')
+            ->where('id', $tokenid)->update(['mac_id' => $result['event_slug']]);
+
+        return $this->success([
+            'token' => $accessToken, $userCreated,
+        ], 'Login Successfully', 200);
+    }
+    /**
+     * @param $provider
+     * @return JsonResponse
+     */
+    protected function validateProvider($provider)
+    {
+        if (!in_array($provider, ['facebook', 'google'])) {
+            return $this->error("Please login using facebook, or google.", 422, []);
+
+        }
     }
 
 }

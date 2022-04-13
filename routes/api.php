@@ -31,6 +31,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::post('/auth/email', [ApiAuthController::class, 'emailValidation'])->name('check.email');
     Route::post('/auth/phone', [ApiAuthController::class, 'phoneValidation'])->name('check.phone');
 
+    // Route::get('auth/login/facebook', [ApiAuthController::class, 'redirectToFacebook']);
+    // Route::get('login/facebook/callback', [ApiAuthController::class, 'handleFacebookCallback']);
+
+    Route::get('/login/{provider}', [ApiAuthController::class,'redirectToProvider']);
+Route::get('/login/{provider}/callback', [ApiAuthController::class,'handleProviderCallback']);
+
     Route::group(['middleware' => ['auth:sanctum', 'apiverified']], function () {
 
         Route::post('/user', [ApiAuthController::class, 'userinfo']);
