@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Video extends Model
 {
-    use HasFactory;
+    use HasFactory,\Conner\Likeable\Likeable;
 
     protected $fillable = [
         'user_id',

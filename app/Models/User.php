@@ -34,7 +34,9 @@ class User extends Authenticatable
         'total_likes',
         'otp',
         'is_verified',
-        'fb_id'
+        'fb_id',
+        'dob',
+        'gender'
     ];
 
     /**
@@ -53,7 +55,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime', 'ban_time' => 'datetime',
+        'email_verified_at' => 'datetime', 'ban_time' => 'datetime','dob',
     ];
 
     public function generateOTP()

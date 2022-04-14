@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    use HasFactory;
+    use HasFactory,\Conner\Likeable\Likeable;
 
     protected $fillable = [
         'id',

@@ -31,6 +31,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::post('/auth/email', [ApiAuthController::class, 'emailValidation'])->name('check.email');
     Route::post('/auth/phone', [ApiAuthController::class, 'phoneValidation'])->name('check.phone');
 
+    Route::post('/send/otp/phone', [ApiAuthController::class, 'otpPhone']);
+    
     // Route::get('auth/login/facebook', [ApiAuthController::class, 'redirectToFacebook']);
     // Route::get('login/facebook/callback', [ApiAuthController::class, 'handleFacebookCallback']);
 
@@ -50,6 +52,8 @@ Route::get('/login/{provider}/callback', [ApiAuthController::class,'handleProvid
         Route::post('/comment/store', [CommentController::class, 'store']);
         Route::post('/reply/store', [CommentController::class, 'replyStore']);
         Route::get('/video/comment/{id}', [ApiAuthController::class, 'video_comment']);
+        Route::post('/video/like', [ApiAuthController::class, 'video_like']);
+        Route::post('/comment/like', [ApiAuthController::class, 'comment_like']);
     });
 
 });

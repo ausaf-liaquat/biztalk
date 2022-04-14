@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Hashtag;
 use App\Models\User;
 use App\Models\Video;
+use App\Models\OtpPhone;
+use App\Models\Comment;
 use App\Notifications\SendOtp;
 use App\Traits\ApiResponser;
 use Helper;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 use Twilio\Rest\Client;
+use Carbon\Carbon;
 
 class ApiAuthController extends Controller
 {
@@ -38,6 +41,8 @@ class ApiAuthController extends Controller
             'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
             'location' => 'required',
             'country' => 'required',
+            'dob' => 'nullable',
+            'gender' => 'nullable',
 
         ]);
 
@@ -51,6 +56,8 @@ class ApiAuthController extends Controller
             'password' => Hash::make($attr['password']),
             'location' => $attr['location'],
             'country' => $attr['country'],
+            'dob' => $attr['dob'],
+            'gender' => $attr['gender'],
 
         ]);
 
@@ -75,18 +82,31 @@ class ApiAuthController extends Controller
             $client = new Client($account_sid, $auth_token);
             $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
         }
-
+        $auth_token = explode('|', $accessToken)[1];
         return $this->success([
-            'token' => $accessToken,
+            'token' => $auth_token,
         ], 'Registration Successfull', 200);
     }
     public function login(Request $request)
     {
-        $attributes = $request->validate([
-            // 'email' => 'required|string|email|',
-            'phone_no' => 'required',
-            'password' => 'required',
-        ]);
+        if (!empty($request->get('phone_no'))) {
+            $attributes = $request->validate([
+                'phone_no' => 'nullable',
+                'password' => 'required',
+            ]);
+        } elseif (!empty($request->get('email'))) {
+            $attributes = $request->validate([
+
+                'email' => 'nullable',
+                'password' => 'required',
+            ]);
+        } elseif (!empty($request->get('username'))) {
+            $attributes = $request->validate([
+
+                'username' => 'nullable',
+                'password' => 'required',
+            ]);
+        }
 
         if (!Auth::attempt($attributes)) {
             return $this->error('Credentials not match', 401);
@@ -100,8 +120,9 @@ class ApiAuthController extends Controller
         DB::table('personal_access_tokens')
             ->where('id', $tokenid)->update(['mac_id' => $request->get('mac_id')]);
 
+        $auth_token = explode('|', $accessToken)[1];
         return $this->success([
-            'token' => $accessToken,
+            'token' => $auth_token,
         ], 'Login Successfully', 200);
     }
     public function forget_password(Request $request)
@@ -161,7 +182,8 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
             $user = Auth::user();
-            return $this->success([$user], "Authenticated User Information", 200);
+            $profile_image = asset('uploads/avtars/' . $user->profile_image);
+            return $this->success([$user ,$profile_image], "Authenticated User Information", 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -371,7 +393,13 @@ class ApiAuthController extends Controller
                     'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
                     'total_comments' => $i->comments->count(),
                     'urls' => asset('uploads/videos/' . $i->video_name),
+                    'video_comments' => $i->comments,
+
                 ];
+                $replies = array();
+                foreach ($i->comments as $comment) {
+                    $replies[] = $comment->replies;
+                }
             }
 
             return $this->success([$v_url], 'Videos list', 200);
@@ -387,11 +415,11 @@ class ApiAuthController extends Controller
             $video->whereHas('comments', function ($query) {
                 $query->where('user_id', Auth::user()->id);
             });
-            // $replies=array();
-            // foreach ($video->comments as $comment) {
-            //    $replies[]= $comment->replies;
-            // }
-            return $this->success(['video_comments' => $video->comments], 'video with comment');
+            $replies = array();
+            foreach ($video->comments as $comment) {
+                $replies[] = $comment->replies;
+            }
+            return $this->success(['video_comments' => $video->comments, $replies], 'video with comment');
         } else {
             return $this->error('No video found', 404);
         }
@@ -463,9 +491,9 @@ class ApiAuthController extends Controller
         $tokenid = $token->accessToken->id;
         DB::table('personal_access_tokens')
             ->where('id', $tokenid)->update(['mac_id' => $result['event_slug']]);
-
+        $auth_token = explode('|', $accessToken)[1];
         return $this->success([
-            'token' => $accessToken, $userCreated,
+            'token' => $auth_token, $userCreated,
         ], 'Login Successfully', 200);
     }
     /**
@@ -478,6 +506,56 @@ class ApiAuthController extends Controller
             return $this->error("Please login using facebook, or google.", 422, []);
 
         }
+    }
+    public function video_like($id)
+    {
+        $video = Video::find($id);
+
+        if ($video->liked(Auth::user()->id)) {
+            return $this->success([], 'Video already liked', 200);
+        } else {
+            $video->like(Auth::user()->id);
+            return $this->success([], 'video liked', 200);
+        }
+
+    }
+    public function comment_like($id)
+    {
+        $comment = Comment::find($id);
+
+        if ($comment->liked(Auth::user()->id)) {
+            return $this->success([$comment->liked(Auth::user()->id)], 'Comment already liked', 200);
+        } else {
+            $comment->like(Auth::user()->id);
+            return $this->success([], 'comment liked', 200);
+        }
+    }
+    public function otpPhone(Request $request)
+    {
+        
+        $exist = OtpPhone::where('phone',$request->get('phone_no'))->first();
+
+        if (empty($exist)) {
+            OtpPhone::create([
+                'code'=>random_int(100000, 999999),
+                'mac_id'=>$request->get('mac_id'),
+                'phone'=>$request->get('phone_no')
+            ]);
+        } else {
+            if(){
+               
+            }
+        }
+        
+        $start_date = new \DateTime('2007-09-01 03:56:58');
+        $since_start = $start_date->diff(new \DateTime(now()));
+//         $to = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', '2015-5-6 3:30:34');
+// $from = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', now());
+
+        // $totalDuration =  $startTime->diff($endTime)->format('%H:%I:%S');
+
+        
+        return response()->json($since_start->format('%I:%S'), 200);
     }
 
 }
