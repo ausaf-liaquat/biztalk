@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Hashtag;
+use App\Models\OtpPhone;
 use App\Models\User;
 use App\Models\Video;
-use App\Models\OtpPhone;
-use App\Models\Comment;
 use App\Notifications\SendOtp;
 use App\Traits\ApiResponser;
 use Helper;
@@ -20,8 +20,6 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
-use Twilio\Rest\Client;
-use Carbon\Carbon;
 
 class ApiAuthController extends Controller
 {
@@ -74,14 +72,14 @@ class ApiAuthController extends Controller
 
         $user->notify(new SendOtp());
 
-        // Twilio Package for sending Activation Code
-        if ($user->phone_no != '') {
-            $account_sid = config('services.twilio.sid');
-            $auth_token = config('services.twilio.token');
-            $twilio_number = config('services.twilio.number');
-            $client = new Client($account_sid, $auth_token);
-            $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
-        }
+        // // Twilio Package for sending Activation Code
+        // if ($user->phone_no != '') {
+        //     $account_sid = config('services.twilio.sid');
+        //     $auth_token = config('services.twilio.token');
+        //     $twilio_number = config('services.twilio.number');
+        //     $client = new Client($account_sid, $auth_token);
+        //     $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
+        // }
         $auth_token = explode('|', $accessToken)[1];
         return $this->success([
             'token' => $auth_token,
@@ -183,7 +181,7 @@ class ApiAuthController extends Controller
 
             $user = Auth::user();
             $profile_image = asset('uploads/avtars/' . $user->profile_image);
-            return $this->success([$user ,$profile_image], "Authenticated User Information", 200);
+            return $this->success([$user, $profile_image], "Authenticated User Information", 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -532,30 +530,30 @@ class ApiAuthController extends Controller
     }
     public function otpPhone(Request $request)
     {
-        
-        $exist = OtpPhone::where('phone',$request->get('phone_no'))->first();
+
+        $exist = OtpPhone::where('phone', $request->get('phone_no'))->first();
 
         if (empty($exist)) {
             OtpPhone::create([
-                'code'=>random_int(100000, 999999),
-                'mac_id'=>$request->get('mac_id'),
-                'phone'=>$request->get('phone_no')
+                'code' => random_int(100000, 999999),
+                'mac_id' => $request->get('mac_id'),
+                'phone' => $request->get('phone_no'),
             ]);
         } else {
-            if(){
-               
+            // '2007-09-01 03:56:58'
+            $start_date = new \DateTime($request->get('startdate'));
+            $since_start = $start_date->diff(new \DateTime(now()));
+            if ($since_start->i > 1) {
+                return response()->json("hjk", 200);
             }
         }
-        
-        $start_date = new \DateTime('2007-09-01 03:56:58');
-        $since_start = $start_date->diff(new \DateTime(now()));
-//         $to = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', '2015-5-6 3:30:34');
-// $from = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', now());
+
+        // $to = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', '2015-5-6 3:30:34');
+        // $from = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', now());
 
         // $totalDuration =  $startTime->diff($endTime)->format('%H:%I:%S');
 
-        
-        return response()->json($since_start->format('%I:%S'), 200);
+        // return response()->json($since_start->i, 200);
     }
 
 }

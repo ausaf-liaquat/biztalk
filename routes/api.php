@@ -32,22 +32,24 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::post('/auth/phone', [ApiAuthController::class, 'phoneValidation'])->name('check.phone');
 
     Route::post('/send/otp/phone', [ApiAuthController::class, 'otpPhone']);
-    
+
     // Route::get('auth/login/facebook', [ApiAuthController::class, 'redirectToFacebook']);
     // Route::get('login/facebook/callback', [ApiAuthController::class, 'handleFacebookCallback']);
 
-    Route::get('/login/{provider}', [ApiAuthController::class,'redirectToProvider']);
-Route::get('/login/{provider}/callback', [ApiAuthController::class,'handleProviderCallback']);
+    Route::get('/login/{provider}', [ApiAuthController::class, 'redirectToProvider']);
+    Route::get('/login/{provider}/callback', [ApiAuthController::class, 'handleProviderCallback']);
 
+    Route::group(['middleware' => ['auth:sanctum']], function () {
+        Route::post('/user', [ApiAuthController::class, 'userinfo']);
+        Route::post('/videos', [ApiAuthController::class, 'videos_list']);
+    });
     Route::group(['middleware' => ['auth:sanctum', 'apiverified']], function () {
 
-        Route::post('/user', [ApiAuthController::class, 'userinfo']);
         Route::post('update/profile-image', [ApiAuthController::class, 'update_profileImage']);
         Route::get('/profile/img', [ApiAuthController::class, 'profile_img_url']);
 
         Route::post('/post/video', [ApiAuthController::class, 'post_video']);
         Route::get('/video/url', [ApiAuthController::class, 'video_url']);
-        Route::post('/videos', [ApiAuthController::class, 'videos_list']);
 
         Route::post('/comment/store', [CommentController::class, 'store']);
         Route::post('/reply/store', [CommentController::class, 'replyStore']);

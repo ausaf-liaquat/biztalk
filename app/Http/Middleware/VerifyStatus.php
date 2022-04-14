@@ -17,7 +17,7 @@ class VerifyStatus
     public function handle(Request $request, Closure $next)
     {
 
-        if ($request->user()->is_verified !== "active") {
+        if ($request->user()->is_verified != "active") {
             if ($request->expectsJson()) {
                 return response()->json(['status'=>Helper::ApiErrorStatus(),'message'=>'Enter 6 Digit Code which sent on your email'],403);
             }
