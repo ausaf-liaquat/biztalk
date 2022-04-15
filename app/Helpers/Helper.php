@@ -41,17 +41,13 @@ class Helper
     public static function hashtags($string)
     {
         if ($string != null) {
-          preg_match_all('/#(\w+)/', $string, $matches);
-
-        foreach ($matches[1] as $match) {
-
-            $keywords[] = $match;
-
+            preg_match_all("/(#\w+)/u", $string, $matches);
+            if ($matches) {
+                $hashtagsArray = array_count_values($matches[0]);
+                $hashtags = array_keys($hashtagsArray);
+            }
+            return $hashtags;
         }
-
-        return (array) $keywords;  
-        }
-        
 
     }
 

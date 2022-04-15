@@ -14,7 +14,7 @@ class Hashtag extends Model
         'slug',
     ];
 
-    protected $table = "Hashtags";
+    protected $table = "hashtags";
 
     public function videos()
     {

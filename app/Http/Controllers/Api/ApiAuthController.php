@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\VideoCollection;
 use App\Models\Comment;
 use App\Models\Hashtag;
 use App\Models\OtpPhone;
@@ -64,8 +65,12 @@ class ApiAuthController extends Controller
             'profile_image' => 'face1.jpg',
 
         ]);
+        if (!empty($request->get('phone_no'))) {
+            $user->is_verified='active';
+            $user->save();
 
-        $user->save();
+        }
+        
         $url = asset('uploads/avtars/' . $user->profile_image);
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
@@ -73,10 +78,12 @@ class ApiAuthController extends Controller
         DB::table('personal_access_tokens')
             ->where('id', $tokenid)->update(['mac_id' => $request->get('mac_id')]);
 
-        //OTP
-        $user->generateOTP();
+        if (!empty($request->get('email'))) {
+            //OTP
+            $user->generateOTP();
 
-        $user->notify(new SendOtp());
+            $user->notify(new SendOtp());
+        }
 
         $auth_token = explode('|', $accessToken)[1];
         return $this->success([
@@ -317,14 +324,16 @@ class ApiAuthController extends Controller
                     $video->video_name = $filename;
                     $video->save();
 
-                    $hashtag = Helper::hashtags($request->get('video_description'));
+                    
 
                     $checkhashtag = Hashtag::pluck('name')->toArray();
 
                     if ($request->get('video_description') != null) {
+                        
+                        $hashtag = Helper::hashtags($request->get('video_description'));
                         if (count($hashtag) > 0) {
 
-                            $video->hashtags = $hashtag;
+                            $video->hashtags =implode(" ",$hashtag);
                             $video->save();
 
                             $tags = array_diff($hashtag, $checkhashtag);
@@ -374,43 +383,45 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
+           $videos = Video::with('comments')->latest()->get();
+            
+            
+            // $v_url = array();
+            // foreach ($videos as $i) {
 
-            $videos = Video::latest()->get();
-            $v_url = array();
-            foreach ($videos as $i) {
+            //     $v_url[] = [
+            //         'video_id' => $i->id,
+            //         'title' => $i->video_title,
+            //         'description' => $i->video_description,
+            //         'investment_req' => $i->investment_req,
+            //         'allow_comment' => $i->allow_comment,
+            //         'user_id' => $i->users->id,
+            //         'username' => $i->users->username,
+            //         'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
+            //         'total_comments' => $i->comments->count(),
+            //         'urls' => asset('uploads/videos/' . $i->video_name),
+            //         'video_comments' => $i->comments,
+            //     ];
 
-                $v_url[] = [
-                    'video_id' => $i->id,
-                    'title' => $i->video_title,
-                    'description' => $i->video_description,
-                    'investment_req' => $i->investment_req,
-                    'allow_comment' => $i->allow_comment,
-                    'user_id' => $i->users->id,
-                    'username' => $i->users->username,
-                    'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
-                    'total_comments' => $i->comments->count(),
-                    'urls' => asset('uploads/videos/' . $i->video_name),
-                    'video_comments' => $i->comments,
-                ];
+            //     $users = array();
+            //     foreach ($i->comments as $comment) {
+            //         $comment->user->username;
+            //         $user[] = ['username' => $comment->user->username,
+            //             'profile_image' => $comment->user->profile_image,
+            //         ];
+            //     }
+            //     $replies = array();
+            //     foreach ($i->comments as $comment) {
+            //         $replies[] = $comment->replies;
+            //         $userreply = array();
+            //         foreach ($comment->replies as $reply) {
+            //             $userreply[] = ['username' => $reply->username, 'profile_image' => $reply->profile_image];
+            //         }
+            //     }
+            // }
 
-                $users = array();
-                foreach ($i->comments as $comment) {
-                    $comment->user->username;
-                    $user[] = ['username' => $comment->user->username,
-                        'profile_image' => $comment->user->profile_image,
-                    ];
-                }
-                $replies = array();
-                foreach ($i->comments as $comment) {
-                    $replies[] = $comment->replies;
-                    $userreply = array();
-                    foreach ($comment->replies as $reply) {
-                        $userreply[] = ['username' => $reply->username, 'profile_image' => $reply->profile_image];
-                    }
-                }
-            }
-
-            return $this->success([$v_url], 'Videos list', 200);
+            return $this->success(new VideoCollection($videos), 'Videos list', 200);
+            // return new  VideoCollection(Video::all());
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -551,27 +562,63 @@ class ApiAuthController extends Controller
             ]);
             // Twilio Package for sending Activation Code
 
-            // $account_sid = config('services.twilio.sid');
-            // $auth_token = config('services.twilio.token');
-            // $twilio_number = config('services.twilio.number');
-            // $client = new Client($account_sid, $auth_token);
-            // $client->messages->create($new_otp->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $new_otp->code]);
+            $account_sid = config('services.twilio.sid');
+            $auth_token = config('services.twilio.token');
+            $twilio_number = config('services.twilio.number');
+            $client = new Client($account_sid, $auth_token);
+            $client->messages->create($new_otp->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $new_otp->code]);
             return $this->success([], 'OTP sent', 200);
 
         } elseif (empty($exist) && !empty($macexist)) {
-             $start_date = new \DateTime($exist->updated_at);
+            $start_date = new \DateTime($macexist->updated_at);
             $since_start = $start_date->diff(new \DateTime(now()));
             if ($since_start->i > 1) {
-                $phone_otp = OtpPhone::where('phone', $request->get('phone_no'))->first();
-                $phone_otp->update([
+                $new_otp1 = OtpPhone::create([
+                    'code' => random_int(100000, 999999),
+                    'mac_id' => $request->get('mac_id'),
+                    'phone' => $request->get('phone_no'),
+                ]);
+                $account_sid = config('services.twilio.sid');
+                $auth_token = config('services.twilio.token');
+                $twilio_number = config('services.twilio.number');
+                $client = new Client($account_sid, $auth_token);
+                $client->messages->create($new_otp1->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $new_otp1->code]);
+                return $this->success([], 'New Generated OTP Sent', 200);
+            } else {
+                return $this->error('Please wait for 60 seconds before you try again', 500, []);
+            }
+        } elseif (!empty($exist) && empty($macexist)) {
+            $start_date = new \DateTime($exist->updated_at);
+            $since_start = $start_date->diff(new \DateTime(now()));
+            if ($since_start->i > 1) {
+                $phoneexist = OtpPhone::where('phone', $request->get('phone_no'))->first();
+                $phoneexist->update([
                     'code' => random_int(100000, 999999),
                     'mac_id' => $request->get('mac_id'),
                 ]);
-                // $account_sid = config('services.twilio.sid');
-                // $auth_token = config('services.twilio.token');
-                // $twilio_number = config('services.twilio.number');
-                // $client = new Client($account_sid, $auth_token);
-                // $client->messages->create($phone_otp->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $phone_otp->code]);
+                $account_sid = config('services.twilio.sid');
+                $auth_token = config('services.twilio.token');
+                $twilio_number = config('services.twilio.number');
+                $client = new Client($account_sid, $auth_token);
+                $client->messages->create($phoneexist->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $phoneexist->code]);
+                return $this->success([], 'New Generated OTP Sent', 200);
+            } else {
+                return $this->error('Please wait for 60 seconds before you try again', 500, []);
+            }
+        } elseif (!empty($exist) && !empty($macexist)) {
+            $start_date = new \DateTime($exist->updated_at);
+            $since_start = $start_date->diff(new \DateTime(now()));
+            if ($since_start->i > 1) {
+                $phoneexist1 = OtpPhone::where('phone', $request->get('phone_no'))->first();
+                $phoneexist1->update([
+                    'code' => random_int(100000, 999999),
+
+                ]);
+                $account_sid = config('services.twilio.sid');
+                $auth_token = config('services.twilio.token');
+                $twilio_number = config('services.twilio.number');
+                $client = new Client($account_sid, $auth_token);
+                $client->messages->create($phoneexist1->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $phoneexist1->code]);
                 return $this->success([], 'New Generated OTP Sent', 200);
             } else {
                 return $this->error('Please wait for 60 seconds before you try again', 500, []);
@@ -584,20 +631,14 @@ class ApiAuthController extends Controller
         $request->validate([
             'code' => 'integer|required',
             'mac_id' => 'required',
-            'phone' => 'required',
+            'phone_no' => 'required',
         ]);
-        $phone_otp = OtpPhone::where('phone', $request->get('phone'))->first();
+        $phone_otp = OtpPhone::where('phone', $request->get('phone_no'))->where('mac_id', $request->get('mac_id'))->first();
         if ($request->input('code') === $phone_otp->code) {
-            $user->is_verified = 'active';
 
-            $user->email_verified_at = \Carbon\Carbon::now();
-            $user->update();
-
-            $user->resetOTP();
-
-            return response()->json(['message' => 'Congrats!! Account verified'], 200);
+            return $this->success([], 'Code matched', 200);
         } else {
-            return response()->json(['status' => 403, 'message' => 'Invalid code!! please enter the correct one'], 403);
+            return $this->error('Please enter the valid code', 500, []);
         }
 
     }
