@@ -32,7 +32,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::post('/auth/phone', [ApiAuthController::class, 'phoneValidation'])->name('check.phone');
 
     Route::post('/send/otp/phone', [ApiAuthController::class, 'otpPhone']);
-
+    Route::post('/verify/otp/phone', [ApiAuthController::class, 'VerifyotpPhone']);
     // Route::get('auth/login/facebook', [ApiAuthController::class, 'redirectToFacebook']);
     // Route::get('login/facebook/callback', [ApiAuthController::class, 'handleFacebookCallback']);
 

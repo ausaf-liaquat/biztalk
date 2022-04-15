@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
+use Twilio\Rest\Client;
 
 class ApiAuthController extends Controller
 {
@@ -56,11 +57,16 @@ class ApiAuthController extends Controller
             'country' => $attr['country'],
             'dob' => $attr['dob'],
             'gender' => $attr['gender'],
+            'isaccount_public' => 1,
+            'total_followings' => 0,
+            'total_followers' => 0,
+            'total_likes' => 0,
+            'profile_image' => 'face1.jpg',
 
         ]);
 
         $user->save();
-
+        $url = asset('uploads/avtars/' . $user->profile_image);
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
         $tokenid = $token->accessToken->id;
@@ -72,17 +78,9 @@ class ApiAuthController extends Controller
 
         $user->notify(new SendOtp());
 
-        // // Twilio Package for sending Activation Code
-        // if ($user->phone_no != '') {
-        //     $account_sid = config('services.twilio.sid');
-        //     $auth_token = config('services.twilio.token');
-        //     $twilio_number = config('services.twilio.number');
-        //     $client = new Client($account_sid, $auth_token);
-        //     $client->messages->create($user->phone_no, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $user->otp]);
-        // }
         $auth_token = explode('|', $accessToken)[1];
         return $this->success([
-            'token' => $auth_token,
+            'token' => $auth_token, 'profile_image' => $url,
         ], 'Registration Successfull', 200);
     }
     public function login(Request $request)
@@ -380,6 +378,7 @@ class ApiAuthController extends Controller
             $videos = Video::latest()->get();
             $v_url = array();
             foreach ($videos as $i) {
+
                 $v_url[] = [
                     'video_id' => $i->id,
                     'title' => $i->video_title,
@@ -392,11 +391,22 @@ class ApiAuthController extends Controller
                     'total_comments' => $i->comments->count(),
                     'urls' => asset('uploads/videos/' . $i->video_name),
                     'video_comments' => $i->comments,
-
                 ];
+
+                $users = array();
+                foreach ($i->comments as $comment) {
+                    $comment->user->username;
+                    $user[] = ['username' => $comment->user->username,
+                        'profile_image' => $comment->user->profile_image,
+                    ];
+                }
                 $replies = array();
                 foreach ($i->comments as $comment) {
                     $replies[] = $comment->replies;
+                    $userreply = array();
+                    foreach ($comment->replies as $reply) {
+                        $userreply[] = ['username' => $reply->username, 'profile_image' => $reply->profile_image];
+                    }
                 }
             }
 
@@ -532,28 +542,64 @@ class ApiAuthController extends Controller
     {
 
         $exist = OtpPhone::where('phone', $request->get('phone_no'))->first();
-
-        if (empty($exist)) {
-            OtpPhone::create([
+        $macexist = OtpPhone::where('mac_id', $request->get('mac_id'))->first();
+        if (empty($exist) && empty($macexist)) {
+            $new_otp = OtpPhone::create([
                 'code' => random_int(100000, 999999),
                 'mac_id' => $request->get('mac_id'),
                 'phone' => $request->get('phone_no'),
             ]);
-        } else {
-            // '2007-09-01 03:56:58'
-            $start_date = new \DateTime($request->get('startdate'));
+            // Twilio Package for sending Activation Code
+
+            // $account_sid = config('services.twilio.sid');
+            // $auth_token = config('services.twilio.token');
+            // $twilio_number = config('services.twilio.number');
+            // $client = new Client($account_sid, $auth_token);
+            // $client->messages->create($new_otp->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $new_otp->code]);
+            return $this->success([], 'OTP sent', 200);
+
+        } elseif (empty($exist) && !empty($macexist)) {
+             $start_date = new \DateTime($exist->updated_at);
             $since_start = $start_date->diff(new \DateTime(now()));
             if ($since_start->i > 1) {
-                return response()->json("hjk", 200);
+                $phone_otp = OtpPhone::where('phone', $request->get('phone_no'))->first();
+                $phone_otp->update([
+                    'code' => random_int(100000, 999999),
+                    'mac_id' => $request->get('mac_id'),
+                ]);
+                // $account_sid = config('services.twilio.sid');
+                // $auth_token = config('services.twilio.token');
+                // $twilio_number = config('services.twilio.number');
+                // $client = new Client($account_sid, $auth_token);
+                // $client->messages->create($phone_otp->phone, ['from' => $twilio_number, 'body' => 'Your Verification code is ' . $phone_otp->code]);
+                return $this->success([], 'New Generated OTP Sent', 200);
+            } else {
+                return $this->error('Please wait for 60 seconds before you try again', 500, []);
             }
         }
 
-        // $to = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', '2015-5-6 3:30:34');
-        // $from = \Carbon\Carbon::createFromFormat('Y-m-d H:s:i', now());
+    }
+    public function VerifyotpPhone(Request $request)
+    {
+        $request->validate([
+            'code' => 'integer|required',
+            'mac_id' => 'required',
+            'phone' => 'required',
+        ]);
+        $phone_otp = OtpPhone::where('phone', $request->get('phone'))->first();
+        if ($request->input('code') === $phone_otp->code) {
+            $user->is_verified = 'active';
 
-        // $totalDuration =  $startTime->diff($endTime)->format('%H:%I:%S');
+            $user->email_verified_at = \Carbon\Carbon::now();
+            $user->update();
 
-        // return response()->json($since_start->i, 200);
+            $user->resetOTP();
+
+            return response()->json(['message' => 'Congrats!! Account verified'], 200);
+        } else {
+            return response()->json(['status' => 403, 'message' => 'Invalid code!! please enter the correct one'], 403);
+        }
+
     }
 
 }
