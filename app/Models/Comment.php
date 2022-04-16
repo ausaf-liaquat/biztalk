@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
-    use HasFactory,\Conner\Likeable\Likeable;
+    use HasFactory, \Conner\Likeable\Likeable;
 
     protected $fillable = [
         'id',
@@ -26,5 +26,10 @@ class Comment extends Model
     public function replies()
     {
         return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public function childrenReplies()
+    {
+        return $this->hasMany(Comment::class,'parent_id')->with('replies');
     }
 }

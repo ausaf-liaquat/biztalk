@@ -15,14 +15,15 @@ class CommentCollection extends ResourceCollection
     public function toArray($request)
     {
         return [
+
             $this->collection->map(function ($data) {
                 return [
-                    'comment_id'=>$data->id,
-                    'video_id'=>$data->commentable_id,
-                    'comment'=>$data->comment,
-                    'user'=>new UserResource($data->user),
-                    'replies'=>$data->replies,
-                   
+                    'comment_id' => $data->id,
+                    'video_id' => $data->commentable_id,
+                    'comment' => $data->comment,
+                    'user' => new UserResource($data->user),
+                    'replies' => new ReplyCollection($data->childrenReplies),
+
                 ];
             }),
         ];

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -66,11 +65,11 @@ class ApiAuthController extends Controller
 
         ]);
         if (!empty($request->get('phone_no'))) {
-            $user->is_verified='active';
+            $user->is_verified = 'active';
             $user->save();
 
         }
-        
+
         $url = asset('uploads/avtars/' . $user->profile_image);
         $token = $user->createToken('APIToken');
         $accessToken = $token->plainTextToken;
@@ -184,9 +183,29 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
-            $user = Auth::user();
-            $profile_image = asset('uploads/avtars/' . $user->profile_image);
-            return $this->success([$user, $profile_image], "Authenticated User Information", 200);
+            $user_videos = array();
+            foreach (Auth::user()->videos as $video) {
+                $user_videos[] = $video->id;
+            }
+            $like = DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->whereIn('likeable_id', $user_videos)->count();
+
+            $user[] = [
+                'user_id' => Auth::user()->id,
+                'first_name' => Auth::user()->first_name,
+                'last_name' => Auth::user()->last_name,
+                'username' => Auth::user()->username,
+                'email' => Auth::user()->email,
+                'phone_no' => Auth::user()->phone_no,
+                'location' => Auth::user()->location,
+                'country' => Auth::user()->country,
+                'dob' => Auth::user()->dob,
+                'gender' => Auth::user()->gender,
+                'is_verified' => Auth::user()->is_verified,
+                'total_like_received'=>$like,
+                'profile_image' => asset('uploads/avtars/' . Auth::user()->profile_image),
+            ];
+
+            return $this->success([$user], "Authenticated User Information", 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -324,16 +343,14 @@ class ApiAuthController extends Controller
                     $video->video_name = $filename;
                     $video->save();
 
-                    
-
                     $checkhashtag = Hashtag::pluck('name')->toArray();
 
                     if ($request->get('video_description') != null) {
-                        
+
                         $hashtag = Helper::hashtags($request->get('video_description'));
                         if (count($hashtag) > 0) {
 
-                            $video->hashtags =implode(" ",$hashtag);
+                            $video->hashtags = implode(" ", $hashtag);
                             $video->save();
 
                             $tags = array_diff($hashtag, $checkhashtag);
@@ -383,9 +400,7 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-           $videos = Video::with('comments')->latest()->get();
-            
-            
+            // $videos = Video::latest()->get();
             // $v_url = array();
             // foreach ($videos as $i) {
 
@@ -398,13 +413,13 @@ class ApiAuthController extends Controller
             //         'user_id' => $i->users->id,
             //         'username' => $i->users->username,
             //         'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
-            //         'total_comments' => $i->comments->count(),
+            //         'total_comments' => $i->allcomments->count(),
             //         'urls' => asset('uploads/videos/' . $i->video_name),
             //         'video_comments' => $i->comments,
             //     ];
 
             //     $users = array();
-            //     foreach ($i->comments as $comment) {
+            //     foreach ($i->allcomments as $comment) {
             //         $comment->user->username;
             //         $user[] = ['username' => $comment->user->username,
             //             'profile_image' => $comment->user->profile_image,
@@ -415,10 +430,17 @@ class ApiAuthController extends Controller
             //         $replies[] = $comment->replies;
             //         $userreply = array();
             //         foreach ($comment->replies as $reply) {
+            //             $nestreplies = array();
+            //             foreach ($reply->childrenReplies as $key) {
+            //                $nestreplies[]=$key;
+            //             }
             //             $userreply[] = ['username' => $reply->username, 'profile_image' => $reply->profile_image];
             //         }
             //     }
             // }
+
+            // return $this->success([$v_url], 'Videos list', 200);
+            $videos = Video::with('comments')->latest()->get();
 
             return $this->success(new VideoCollection($videos), 'Videos list', 200);
             // return new  VideoCollection(Video::all());
@@ -426,7 +448,6 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
     }
-
     public function video_comment($id)
     {
         $video = Video::find($id);
@@ -526,15 +547,22 @@ class ApiAuthController extends Controller
 
         }
     }
-    public function video_like($id)
+    public function video_like(Request $request)
     {
-        $video = Video::find($id);
+        $token = $request->bearerToken();
 
-        if ($video->liked(Auth::user()->id)) {
-            return $this->success([], 'Video already liked', 200);
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $video = Video::find($request->get('id'));
+
+            if ($video->liked(Auth::user()->id)) {
+                return $this->success([], 'Video already liked', 200);
+            } else {
+                $video->like(Auth::user()->id);
+
+                return $this->success([], 'video liked', 200);
+            }
         } else {
-            $video->like(Auth::user()->id);
-            return $this->success([], 'video liked', 200);
+            return $this->fail("UnAuthorized", 500);
         }
 
     }

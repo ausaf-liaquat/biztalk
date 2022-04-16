@@ -76,7 +76,7 @@ class User extends Authenticatable
 
     public function videos()
     {
-        return $this->belongsTo(Video::class);
+        return $this->hasMany(Video::class);
     }
     public function providers()
     {

@@ -11,6 +11,13 @@ class Video extends Model
 {
     use HasFactory,\Conner\Likeable\Likeable;
 
+    /**
+   * The relationships that should always be loaded.
+   *
+   * @var array
+   */
+  
+
     protected $fillable = [
         'user_id',
         'is_flagged',
@@ -38,6 +45,11 @@ class Video extends Model
     public function comments()
     {
         return $this->morphMany(Comment::class, 'commentable')->whereNull('parent_id');
+    }
+
+    public function allcomments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
     }
 
     public function hashtags()

@@ -18,9 +18,14 @@ class ReplyCollection extends ResourceCollection
             $this->collection->map(function ($data) {
                 return [
                     // 'reply'=>$data->replies,
-                    'user_id'=>$data->user->id,
+                    'comment_id' => $data->id,
+                    'video_id' => $data->commentable_id,
+                    'comment' => $data->comment,
+                    'parent_id' => $data->parent_id,
+                    'user_id' => $data->user->id,
                     'username' => $data->user->username,
-                    'profile_image'=>asset('uploads/avtars/'.$data->user->profile_image)
+                    'profile_image' => asset('uploads/avtars/' . $data->user->profile_image),
+                    'nested_replies'=>new ReplyCollection($data->replies)
                 ];
             }),
         ];

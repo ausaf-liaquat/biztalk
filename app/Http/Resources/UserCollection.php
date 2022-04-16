@@ -18,8 +18,8 @@ class UserCollection extends ResourceCollection
             $this->collection->map(function ($data) {
                 return [
                     'user_id'=>$data->id,
-                    // 'username' => $data->username,
-                    // 'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
+                    'username' => $data->username,
+                    'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
                 ];
             }),
         ];
