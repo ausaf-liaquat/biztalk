@@ -32,6 +32,7 @@ class VideoCollection extends ResourceCollection
                     'user_id' => $data->users->id,
                     'username' => $data->users->username,
                     'user_name' => $data->users->first_name . ' ' . $data->users->last_name,
+                    'profile_image' => asset('uploads/avtars/' . $data->users->profile_image),
                     'total_comments' => $data->allcomments->count(),
                     'total_likes' => $data->likeCount,
                     'urls' => asset('uploads/videos/' . $data->video_name),
