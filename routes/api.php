@@ -41,7 +41,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
     Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::post('/user', [ApiAuthController::class, 'userinfo']);
-        Route::post('/videos', [ApiAuthController::class, 'videos_list']);
+        Route::post('/videos/list', [ApiAuthController::class, 'videos_list']);
     });
     Route::group(['middleware' => ['auth:sanctum', 'apiverified']], function () {
 

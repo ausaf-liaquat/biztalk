@@ -55,7 +55,7 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime', 'ban_time' => 'datetime','dob',
+        'email_verified_at' => 'datetime', 'ban_time' => 'datetime',
     ];
 
     public function generateOTP()

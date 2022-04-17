@@ -140,12 +140,14 @@ class ApiAuthController extends Controller
         $response = Password::sendResetLink($input);
         if ($response == Password::RESET_LINK_SENT) {
             $message = "Mail send successfully";
+
+            return $this->success([], $message, 200);
         } else {
-            $message = "Email could not be sent to this email address";
+            return $this->error('Something went wrong', 500, []);
         }
         //$message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : GLOBAL_SOMETHING_WANTS_TO_WRONG;
-        $response = ["status" => Helper::ApiSuccessStatus(), 'data' => '', 'message' => $message];
-        return response($response, 200);
+        // $response = ["status" => Helper::ApiSuccessStatus(), 'data' => '', 'message' => $message];
+        // return response($response, 200);
 
     }
     public function newPassword(Request $request)
@@ -201,7 +203,7 @@ class ApiAuthController extends Controller
                 'dob' => Auth::user()->dob,
                 'gender' => Auth::user()->gender,
                 'is_verified' => Auth::user()->is_verified,
-                'total_like_received'=>$like,
+                'total_like_received' => $like,
                 'profile_image' => asset('uploads/avtars/' . Auth::user()->profile_image),
             ];
 
