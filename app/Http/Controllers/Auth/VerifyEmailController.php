@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\User;
 
 class VerifyEmailController extends Controller
 {
@@ -17,14 +18,16 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+        $user=User::find($request->route('id'));
+        // dd($user);
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('status')->with('status','Your account is already verified with this link');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
         }
 
-        return redirect()->intended(RouteServiceProvider::HOME.'?verified=1');
+       return redirect()->route('status')->with('status','Your account has been verified');
     }
 }

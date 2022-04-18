@@ -22,6 +22,7 @@ class CommentCollection extends ResourceCollection
                     'video_id' => $data->commentable_id,
                     'comment' => $data->comment,
                     'user' => new UserResource($data->user),
+                    'created_at'=>$data->created_at,
                     'replies' => new ReplyCollection($data->childrenReplies),
 
                 ];

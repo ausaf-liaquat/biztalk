@@ -8,7 +8,6 @@ use App\Models\Hashtag;
 use App\Models\OtpPhone;
 use App\Models\User;
 use App\Models\Video;
-use App\Notifications\SendOtp;
 use App\Traits\ApiResponser;
 use Helper;
 use Illuminate\Auth\Events\PasswordReset;
@@ -81,7 +80,8 @@ class ApiAuthController extends Controller
             //OTP
             $user->generateOTP();
 
-            $user->notify(new SendOtp());
+            $user->sendEmailVerificationNotification();
+            // $user->notify(new SendOtp());
         }
 
         $auth_token = explode('|', $accessToken)[1];
@@ -556,27 +556,52 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $video = Video::find($request->get('id'));
 
-            if ($video->liked(Auth::user()->id)) {
-                return $this->success([], 'Video already liked', 200);
-            } else {
-                $video->like(Auth::user()->id);
+            if ($request->get('response') == 1) {
+                if ($video->liked(Auth::user()->id)) {
+                    return $this->success([], 'Video already liked', 200);
+                } else {
+                    $video->like(Auth::user()->id);
 
-                return $this->success([], 'video liked', 200);
+                    return $this->success([], 'video liked', 200);
+                }
+            } elseif ($request->get('response') == 0) {
+
+                $video->unlike(Auth::user()->id);
+
+                return $this->success([], 'video unliked', 200);
+
             }
+
         } else {
             return $this->fail("UnAuthorized", 500);
         }
 
     }
-    public function comment_like($id)
+    public function comment_like(Request $request)
     {
-        $comment = Comment::find($id);
+        $token = $request->bearerToken();
 
-        if ($comment->liked(Auth::user()->id)) {
-            return $this->success([$comment->liked(Auth::user()->id)], 'Comment already liked', 200);
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $comment = Comment::find($request->get('id'));
+
+            if ($request->get('response') == 1) {
+                if ($comment->liked(Auth::user()->id)) {
+
+                    return $this->success([], 'Comment already liked', 200);
+                } else {
+                    $comment->like(Auth::user()->id);
+                    return $this->success([], 'comment liked', 200);
+                }
+
+            } elseif ($request->get('response') == 0) {
+
+                $comment->unlike(Auth::user()->id);
+
+                return $this->success([], 'comment unliked', 200);
+
+            }
         } else {
-            $comment->like(Auth::user()->id);
-            return $this->success([], 'comment liked', 200);
+            return $this->fail("UnAuthorized", 500);
         }
     }
     public function otpPhone(Request $request)

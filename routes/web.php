@@ -3,6 +3,10 @@
 use App\Http\Controllers\Backend\DashboardController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/cache', function() {
+    $exitCode = Artisan::call('config:cache');
+    return "ok";
+});
 Route::get('/', function () {
 
     //     $iv_real = "ahc/2u6F0Yvww12fyQiZWA==";
@@ -52,6 +56,9 @@ Route::get('/', function () {
     // //      dd(openssl_decrypt($ciphertext, $AES_METHOD, $password, OPENSSL_RAW_DATA, $iv));
     return view('welcome');
 });
+Route::get('/status', function () {
+    return view('Backend.pages.status-display');
+})->name('status');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
