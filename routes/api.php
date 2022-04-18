@@ -53,7 +53,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
         Route::post('/comment/store', [CommentController::class, 'store']);
         Route::post('/reply/store', [CommentController::class, 'replyStore']);
-        Route::get('/video/comment/{id}', [ApiAuthController::class, 'video_comment']);
+        Route::post('/video/comment', [ApiAuthController::class, 'video_comment']);
         Route::post('/video/like', [ApiAuthController::class, 'video_like']);
         Route::post('/comment/like', [ApiAuthController::class, 'comment_like']);
     });

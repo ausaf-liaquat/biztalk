@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 class ReplyCollection extends ResourceCollection
 {
@@ -25,6 +26,9 @@ class ReplyCollection extends ResourceCollection
                     'user_id' => $data->user->id,
                     'username' => $data->user->username,
                     'profile_image' => asset('uploads/avtars/' . $data->user->profile_image),
+                    'isReplyLiked'=>$data->liked(Auth::user()->id),
+                    'total_likes' => $data->likeCount,
+                    'created_at'=>$data->created_at,
                     'nested_replies'=>new ReplyCollection($data->replies)
                 ];
             }),

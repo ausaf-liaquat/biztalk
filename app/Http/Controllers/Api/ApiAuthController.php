@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CommentCollection;
 use App\Http\Resources\VideoCollection;
 use App\Models\Comment;
 use App\Models\Hashtag;
@@ -450,18 +451,18 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
     }
-    public function video_comment($id)
+    public function video_comment(Request $request)
     {
-        $video = Video::find($id);
+        $video = Video::find($request->get('id'));
         if ($video != null) {
-            $video->whereHas('comments', function ($query) {
-                $query->where('user_id', Auth::user()->id);
-            });
-            $replies = array();
-            foreach ($video->comments as $comment) {
-                $replies[] = $comment->replies;
-            }
-            return $this->success(['video_comments' => $video->comments, $replies], 'video with comment');
+            // $video->whereHas('comments', function ($query) {
+            //     $query->where('user_id', Auth::user()->id);
+            // });
+            // $replies = array();
+            // foreach ($video->comments as $comment) {
+            //     $replies[] = $comment->replies;
+            // }
+            return $this->success(['video_comments' => new CommentCollection($video->comments)], 'video with comments and replies');
         } else {
             return $this->error('No video found', 404);
         }

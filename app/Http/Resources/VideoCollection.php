@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 class VideoCollection extends ResourceCollection
 {
@@ -35,6 +36,9 @@ class VideoCollection extends ResourceCollection
                     'profile_image' => asset('uploads/avtars/' . $data->users->profile_image),
                     'total_comments' => $data->allcomments->count(),
                     'total_likes' => $data->likeCount,
+                    'isVideoLiked'=>$data->liked(Auth::user()->id),
+                    'created_at'=>$data->created_at,
+                    'video_category'=>$data->video_category,
                     'urls' => asset('uploads/videos/' . $data->video_name),
                     'video_comments' => new CommentCollection($data->comments),
                     // 'comments_users'=>new UserCollection($data->comments),

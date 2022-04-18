@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Support\Facades\Auth;
 
 class CommentCollection extends ResourceCollection
 {
@@ -23,6 +24,9 @@ class CommentCollection extends ResourceCollection
                     'comment' => $data->comment,
                     'user' => new UserResource($data->user),
                     'created_at'=>$data->created_at,
+                    'total_replies'=>$data->replies->count(),
+                    'isCommentLiked'=>$data->liked(Auth::user()->id),
+                    'total_likes' => $data->likeCount,
                     'replies' => new ReplyCollection($data->childrenReplies),
 
                 ];
