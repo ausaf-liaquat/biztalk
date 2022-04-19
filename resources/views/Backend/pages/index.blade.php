@@ -13,40 +13,58 @@
                                     <div class="statistics-details align-items-center justify-content-between">
                                         <div class="card">
                                             <div class="card-body">
-                                                <p class="statistics-title">Total Users <i class="mdi mdi-account icons"></i></p>
-                                                <h3 class="rate-percentage">0</h3>
+                                                <p class="statistics-title">Total Users <i
+                                                        class="fa-solid fa-user icons"></i></p>
+                                                <h3 class="rate-percentage">{{ $user_count }}</h3>
                                             </div>
                                         </div>
-                                      
+
 
                                     </div>
                                 </div>
                                 <div class="col-sm-4">
-                                        <div class="statistics-details align-items-center justify-content-between">
+                                    <div class="statistics-details align-items-center justify-content-between">
                                         <div class="card">
-                                                  <div class="card-body">
-                                                      <p class="statistics-title">Total Videos <i class="mdi mdi-message-video icons" ></i></p>
-                                                      <h3 class="rate-percentage">0</h3>
-                                                  </div>
-                                              </div>
+                                            <div class="card-body">
+                                                <p class="statistics-title">Total Videos <i
+                                                        class="fa-solid fa-video icons"></i></p>
+                                                <h3 class="rate-percentage">{{ $video_count }}</h3>
+                                            </div>
                                         </div>
-                                              
+                                    </div>
+
                                 </div>
                                 <div class="col-sm-4">
-                                        <div class="statistics-details align-items-center justify-content-between">
+                                    <div class="statistics-details align-items-center justify-content-between">
                                         <div class="card">
-                                                  <div class="card-body">
-                                                      <p class="statistics-title">User Activities <i class="mdi mdi-message-video icons"></i></p>
-                                                      <h3 class="rate-percentage">0</h3>
-                                                      
-                                                      
-                                                  </div>
-                                              </div>
+                                            <div class="card-body">
+                                                <p class="statistics-title">User Activities <i
+                                                        class="fa-solid fa-align-justify icons"></i></p>
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <h3 class="rate-percentage"> <span
+                                                                style="font-size: 10px;">Like</span> {{ $like_count }}
+                                                        </h3>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <h3 class="rate-percentage"> <span
+                                                                style="font-size: 10px;">Comments</span>
+                                                            {{ $comment_count }}</h3>
+                                                    </div>
+                                                    {{-- <div class="col-sm-4">
+                                                        <h3 class="rate-percentage"> <span style="font-size: 10px;">Tickets</span>  0</h3> 
+                                                     </div> --}}
+                                                </div>
+
+
+
+                                            </div>
                                         </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-8 d-flex flex-column">
+                                {{-- <div class="col-lg-8 d-flex flex-column">
                                     <div class="row flex-grow">
                                         <div class="col-12 col-lg-4 col-lg-12 grid-margin stretch-card">
                                             <div class="card card-rounded">
@@ -68,8 +86,96 @@
                                             </div>
                                         </div>
                                     </div>
+                                </div> --}}
+
+
+
+                                {{-- <div class="row"> --}}
+                                <div class="col-lg-8 d-flex flex-column">
+
+
+                                    <div class="row flex-grow">
+                                        <div class="col-12 grid-margin stretch-card">
+                                            <div class="card card-rounded">
+                                                <div class="card-body">
+                                                    <div class="d-sm-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <h4 class="card-title card-title-dash">Recent Users</h4>
+                                                            {{-- <p class="card-subtitle card-subtitle-dash">You
+                                                                    have 50+ new requests</p> --}}
+                                                        </div>
+                                                        {{-- <div>
+                                                                <button class="btn btn-primary btn-lg text-white mb-0 me-0"
+                                                                    type="button"><i class="mdi mdi-account-plus"></i>Add
+                                                                    new member</button>
+                                                            </div> --}}
+                                                    </div>
+                                                    <div class="table-responsive  mt-1">
+                                                        <table class="table select-table">
+                                                            <thead>
+                                                                <tr>
+
+                                                                    <th>Users</th>
+                                                                    <th>Joined Date</th>
+                                                                    <th>Phone no</th>
+                                                                    <th>Email</th>
+                                                                    <th>Location</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @forelse ($recent_users as $item)
+                                                                    <tr>
+
+                                                                        <td>
+                                                                            <div class="d-flex ">
+                                                                                <img src="{{ asset('uploads/avtars/' . $item->profile_image) }}"
+                                                                                    alt="{{ $item->username }}">
+                                                                                <div>
+                                                                                    <h6>{{ $item->first_name . ' ' . $item->last_name }}
+                                                                                    </h6>
+                                                                                    <p>{{ $item->username }}</p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <h6>{{ date('j \\ F Y', strtotime($item->created_at)) }}
+                                                                            </h6>
+                                                                            <p>Joined</p>
+                                                                        </td>
+                                                                        <td>
+                                                                            <h6>{{ $item->phone_no != '' ? $item->phone_no : '-' }}
+                                                                            </h6>
+                                                                            <p>Phone no</p>
+                                                                        </td>
+                                                                        <td>
+                                                                            <h6>{{ $item->email != '' ? $item->email : '-' }}
+                                                                            </h6>
+                                                                            <p>Email</p>
+                                                                        </td>
+                                                                        <td>
+                                                                            <h6>{{ $item->country != '' ? $item->country : '-' }}
+                                                                            </h6>
+                                                                            <p>Location</p>
+                                                                        </td>
+                                                                    </tr>
+                                                                @empty
+                                                                    <tr>
+                                                                        <td colspan="5">No record found.</td>
+                                                                    </tr>
+                                                                @endforelse
+
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
+                                {{-- </div> --}}
                                 <div class="col-lg-4 d-flex flex-column">
                                     <div class="row flex-grow">
                                         <div class="col-12 grid-margin stretch-card">
@@ -81,7 +187,7 @@
                                                                 <h4 class="card-title card-title-dash">New Tickets</h4>
                                                                 <div class="add-items d-flex mb-0">
                                                                     <!-- <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?"> -->
-                                                                   
+
                                                                 </div>
                                                             </div>
                                                             <div class="list-wrapper">
@@ -168,182 +274,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="row">
-                                    <div class="col-lg-12 d-flex flex-column">
-
-
-                                        <div class="row flex-grow">
-                                            <div class="col-12 grid-margin stretch-card">
-                                                <div class="card card-rounded">
-                                                    <div class="card-body">
-                                                        <div class="d-sm-flex justify-content-between align-items-start">
-                                                            <div>
-                                                                <h4 class="card-title card-title-dash">Recent Users</h4>
-                                                                {{-- <p class="card-subtitle card-subtitle-dash">You
-                                                                    have 50+ new requests</p> --}}
-                                                            </div>
-                                                            {{-- <div>
-                                                                <button class="btn btn-primary btn-lg text-white mb-0 me-0"
-                                                                    type="button"><i class="mdi mdi-account-plus"></i>Add
-                                                                    new member</button>
-                                                            </div> --}}
-                                                        </div>
-                                                        <div class="table-responsive  mt-1">
-                                                            <table class="table select-table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>
-                                                                            Sr. no
-                                                                        </th>
-                                                                        <th>Users</th>
-                                                                        <th>Joined Date</th>
-                                                                        <th>Phone no</th>
-                                                                        <th>Location</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td>
-                                                                            1
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="d-flex ">
-                                                                                <img src="{{asset('assets/images/faces/face1.jpg')}}" alt="">
-                                                                                <div>
-                                                                                    <h6>Brandon Washington</h6>
-                                                                                    <p>Head admin</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <h6>13 aug 2022</h6>
-                                                                            <p>Joined</p>
-                                                                        </td>
-                                                                        <td>
-                                                                            <h6>213-456-2345</h6>
-                                                                            <p>Phone no</p>
-                                                                        </td>
-                                                                        <td>
-                                                                            <h6>New Yourk</h6>
-                                                                            <p>Location</p>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td>
-                                                                           2
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="d-flex">
-                                                                                <img src="{{asset('assets/images/faces/face2.jpg')}}" alt="">
-                                                                                <div>
-                                                                                    <h6>John Brooks</h6>
-                                                                                    <p>Head admin</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                                <h6>13 aug 2022</h6>
-                                                                                <p>Joined</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>213-456-2345</h6>
-                                                                                <p>Phone no</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>New Yourk</h6>
-                                                                                <p>Location</p>
-                                                                            </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td>
-                                                                            3
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="d-flex">
-                                                                                <img src="{{asset('assets/images/faces/face3.jpg')}}" alt="">
-                                                                                <div>
-                                                                                    <h6>Wayne Murphy</h6>
-                                                                                    <p>Head admin</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                                <h6>13 aug 2022</h6>
-                                                                                <p>Joined</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>213-456-2345</h6>
-                                                                                <p>Phone no</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>New Yourk</h6>
-                                                                                <p>Location</p>
-                                                                            </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td>
-                                                                            4
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="d-flex">
-                                                                                <img src="{{asset('assets/images/faces/face4.jpg')}}" alt="">
-                                                                                <div>
-                                                                                    <h6>Matthew Bailey</h6>
-                                                                                    <p>Head admin</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                                <h6>13 aug 2022</h6>
-                                                                                <p>Joined</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>213-456-2345</h6>
-                                                                                <p>Phone no</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>New Yourk</h6>
-                                                                                <p>Location</p>
-                                                                            </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td>
-                                                                            5
-                                                                        </td>
-                                                                        <td>
-                                                                            <div class="d-flex">
-                                                                                <img src="{{asset('assets/images/faces/face5.jpg')}}" alt="">
-                                                                                <div>
-                                                                                    <h6>Katherine Butler</h6>
-                                                                                    <p>Head admin</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                                <h6>13 aug 2022</h6>
-                                                                                <p>Joined</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>213-456-2345</h6>
-                                                                                <p>Phone no</p>
-                                                                            </td>
-                                                                            <td>
-                                                                                <h6>New Yourk</h6>
-                                                                                <p>Location</p>
-                                                                            </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -352,5 +282,4 @@
         </div>
     @endsection
     @section('extrajs')
-        
     @endsection

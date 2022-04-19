@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\User;
 use App\Models\Video;
+use App\Models\Comment;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,8 +15,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-
-        return view('Backend.pages.index');
+        $user_count = User::doesntHave('roles')->count();
+        $video_count = Video::count();
+        $like_count =  \DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->count();
+        $comment_count = Comment::count();
+        $recent_users= User::doesntHave('roles')->latest()->take(5)->get();
+        // dd($recent_users);
+        return view('Backend.pages.index',compact('user_count','video_count','like_count','comment_count','recent_users'));
 
     }
     public function userindex()

@@ -205,6 +205,8 @@ class ApiAuthController extends Controller
                 'gender' => Auth::user()->gender,
                 'is_verified' => Auth::user()->is_verified,
                 'total_like_received' => $like,
+                'followers_count' => Auth::user()->followers()->count(),
+                'followings_count' => Auth::user()->followings()->count(),
                 'profile_image' => asset('uploads/avtars/' . Auth::user()->profile_image),
             ];
 
@@ -695,6 +697,19 @@ class ApiAuthController extends Controller
             return $this->success([], 'Code matched', 200);
         } else {
             return $this->error('Please enter the valid code', 500, []);
+        }
+
+    }
+    public function discover(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $hashtag =Hashtag::with('videos')->get();
+            return $this->success([$hashtag], 'comment liked', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
         }
 
     }

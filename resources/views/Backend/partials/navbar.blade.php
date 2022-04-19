@@ -14,7 +14,7 @@
             </a>
         </div>
     </div>
-    <div class="navbar-menu-wrapper d-flex align-items-top" style="border-bottom: 1px solid #c7c3c3;">
+    <div class="navbar-menu-wrapper d-flex align-items-top" style="border-bottom: 1px solid #e7e7e7;">
         <ul class="navbar-nav">
             <li class="nav-item font-weight-semibold d-none d-lg-block ms-0">
                 <h1 class="welcome-text" style="font-size: medium;">Welcome, <span class="text-black fw-bold"> @if (auth()->user()->HasRole('superadmin'))
@@ -32,7 +32,7 @@
                     <input type="search" class="form-control" placeholder="Search Here" title="Search here">
                 </form>
             </li> --}}
-            <li class="nav-item dropdown">
+            {{-- <li class="nav-item dropdown">
                 <a class="nav-link count-indicator" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
                     <i class="icon-mail icon-lg"></i>
                 </a>
@@ -115,7 +115,7 @@
                         </div>
                     </a>
                 </div>
-            </li>
+            </li> --}}
             <li class="nav-item dropdown d-none d-lg-block user-dropdown">
                 <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                     <img class="img-xs rounded-circle" src="{{ asset('assets/images/faces/face8.jpg') }}"
