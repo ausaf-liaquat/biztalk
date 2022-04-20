@@ -40,6 +40,7 @@ class VideoCollection extends ResourceCollection
                     'created_at'=>$data->created_at,
                     'video_category'=>$data->video_category,
                     'urls' => asset('uploads/videos/' . $data->video_name),
+                    'views_count'=>$data->view->count(),
                     'video_comments' => new CommentCollection($data->comments),
                     // 'comments_users'=>new UserCollection($data->comments),
                     // 'replies'=>new ReplyCollection($data->comments)

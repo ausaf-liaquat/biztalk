@@ -3,12 +3,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentCollection;
+use App\Http\Resources\HashtagCollection;
 use App\Http\Resources\VideoCollection;
+use App\Models\Banner;
 use App\Models\Comment;
 use App\Models\Hashtag;
 use App\Models\OtpPhone;
 use App\Models\User;
 use App\Models\Video;
+use App\Models\VideoView;
 use App\Traits\ApiResponser;
 use Helper;
 use Illuminate\Auth\Events\PasswordReset;
@@ -706,12 +709,54 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
-            $hashtag =Hashtag::with('videos')->get();
-            return $this->success([$hashtag], 'comment liked', 200);
+            //$hashtag = Hashtag::where('views','>=',2)->inRandomOrder()->get();
+
+            $hashtag = Hashtag::where('views', '>=', 2)->get()->sortByDesc('views');
+            $banner = Banner::first();
+
+            foreach (json_decode($banner->image_name) as $item) {
+                $url = asset('uploads/banners/' . $item);
+                $banner_image[] = $url;
+            }
+
+            // $banner_image = implode(' ', $banner_image);
+
+            return $this->success(['banners' => $banner_image, 'hashtags' => new HashtagCollection($hashtag)], 'Discovers api', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
 
+    }
+    public function video_view(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $user_id = $request->get('user_id');
+            $video_id = $request->get('video_id');
+
+            $videoview = VideoView::where('user_id', $user_id)->where('video_id', $video_id)->first();
+            if (empty($videoview)) {
+                $view = VideoView::create([
+                    'user_id' => $user_id,
+                    'video_id' => $video_id,
+                ]);
+                $view->viewed_on = now();
+                $view->increment('views', 1);
+                $view->save();
+                $video = Video::find($video_id);
+                $hashtags_arr = explode(" ", $video->hashtags);
+
+                Hashtag::whereIn('name', $hashtags_arr)->increment('views', 1);
+                return $this->success([$hashtags_arr], 'Hashtags', 200);
+            } else {
+                return $this->error("already viewed", 500);
+            }
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
     }
 
 }

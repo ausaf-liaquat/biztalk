@@ -56,4 +56,12 @@ class Video extends Model
     {
         return $this->belongsToMany(Hashtag::class, 'hashtag_video', 'video_id', 'hashtag_id');
     }
+
+    /**
+     * Get the comments for the blog post.
+     */
+    public function view()
+    {
+        return $this->hasMany(VideoView::class);
+    }
 }
