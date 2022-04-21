@@ -19,6 +19,7 @@ class UserCollection extends ResourceCollection
                 return [
                     'user_id'=>$data->id,
                     'username' => $data->username,
+                    'full_name'=> $data->first_name.' '.$data->last_name,
                     'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
                 ];
             }),

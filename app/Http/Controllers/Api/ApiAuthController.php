@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentCollection;
 use App\Http\Resources\HashtagCollection;
+use App\Http\Resources\UserCollection;
 use App\Http\Resources\VideoCollection;
 use App\Models\Banner;
 use App\Models\Comment;
@@ -757,6 +758,83 @@ class ApiAuthController extends Controller
         } else {
             return $this->fail("UnAuthorized", 500);
         }
+    }
+    public function user_videos(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $user_videos = Auth::user()->videos->where('is_active', 1);
+            return $this->success(new VideoCollection($user_videos), 'user videos', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function user_privatevideos(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $user_videos = Auth::user()->videos->where('is_active', 0);
+            return $this->success(new VideoCollection($user_videos), 'users private videos', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function user_likedvideos(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $liked_videos = Video::whereLikedBy(Auth::user()->id)->with('likeCounter')->orderBy('created_at', 'DESC')->get();
+            return $this->success(new VideoCollection($liked_videos), 'users liked videos', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function search(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            //   $user =  User::where('username','like','%'.$withoutspace.'%')->get();
+
+            $search = $request->get('search');
+            $names = explode(" ", $request->get('search'));
+
+            if ($search == trim($search) && str_contains($search, ' ')) {
+                $user = User::where(function ($query) use ($names) {
+                    // $query->whereIn('first_name',  $names );
+                    // $query->orWhere(function ($query) use ($names) {
+                    //     $query->whereIn('last_name',  $names );
+                    // });
+                    for ($i = 0; $i < count($names); $i++) {
+                        $query->orwhere('first_name', 'like', '%' . $names[$i] . '%');
+                        $query->orwhere('last_name', 'like', '%' . $names[$i] . '%');
+                    }
+                })->get();
+            } else {
+                $user = User::where(function ($query) use ($search) {
+                    $query->where('username', 'like', '%' . $search . '%');
+
+                })->get();
+            }
+            $video = Video::where(function ($query) use ($names) {
+                foreach($names as $k){
+                $query->orWhere('video_title', 'like', '%' . $k . '%');
+                $query->orWhere('video_description', 'like', '%' . $k . '%');
+                    $query->orWhere('hashtags', 'like', "%" . $k . "%");
+                }
+            })->get();
+            $hashtag = Hashtag::where('name','like','%'.$search.'%')->get();
+            return $this->success(['users'=>new UserCollection($user),'videos'=>new VideoCollection($video),'hashtags'=>new HashtagCollection($hashtag)], 'video liked', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
     }
 
 }

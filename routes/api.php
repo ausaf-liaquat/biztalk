@@ -60,8 +60,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
         Route::post('/discover', [ApiAuthController::class, 'discover']);
 
-
-        
+        Route::post('/search', [ApiAuthController::class, 'search']);
+        Route::post('/my/videos', [ApiAuthController::class, 'user_videos']);
+        Route::post('/my/private/videos', [ApiAuthController::class, 'user_privatevideos']);
+        Route::post('/my/liked/videos', [ApiAuthController::class, 'user_likedvideos']);
     });
 
 });

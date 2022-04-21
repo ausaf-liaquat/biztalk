@@ -37,6 +37,7 @@ class VideoCollection extends ResourceCollection
                     'total_comments' => $data->allcomments->count(),
                     'total_likes' => $data->likeCount,
                     'isVideoLiked'=>$data->liked(Auth::user()->id),
+                    'isVideoPublic'=>$data->is_active,
                     'created_at'=>$data->created_at,
                     'video_category'=>$data->video_category,
                     'urls' => asset('uploads/videos/' . $data->video_name),
