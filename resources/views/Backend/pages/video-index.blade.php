@@ -23,6 +23,9 @@
                                             Video
                                         </th>
                                         <th>
+                                            Actions
+                                        </th>
+                                        <th>
                                             Investment Required
                                         </th>
                                         <th>
@@ -40,9 +43,7 @@
                                         <th>
                                             Posted at
                                         </th>
-                                        <th>
-                                            Actions
-                                        </th>
+                                        
 
                                     </tr>
                                 </thead>
@@ -88,6 +89,11 @@
                         name: 'video',
 
                     },
+                     {
+                        data: 'action',
+                        name: 'action',
+
+                    },
                     {
                         data: 'investment_req',
                         name: 'investment_req',
@@ -118,11 +124,7 @@
                         name: 'created_at',
 
                     },
-                    {
-                        data: 'action',
-                        name: 'action',
-
-                    },
+                   
                 ],
                 'responsive': true,
                 "ordering": false,

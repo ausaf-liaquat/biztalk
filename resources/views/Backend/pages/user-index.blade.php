@@ -27,6 +27,9 @@
                                         </th>
                                         <th>
                                             Email
+                                        </th> 
+                                        <th>
+                                            Actions
                                         </th>
                                         <th>
                                             Status
@@ -34,9 +37,7 @@
                                         <th>
                                             Joined Date
                                         </th>
-                                        <th>
-                                            Actions
-                                        </th>
+                                       
 
                                     </tr>
                                 </thead>
@@ -94,6 +95,11 @@
 
                     },
                     {
+                        data: 'action',
+                        name: 'action',
+
+                    },
+                    {
                         data: 'status',
                         name: 'status',
 
@@ -103,11 +109,7 @@
                         name: 'joineddate',
 
                     },
-                    {
-                        data: 'action',
-                        name: 'action',
-
-                    },
+                    
                 ],
                 'responsive': true,
                 "ordering": false,

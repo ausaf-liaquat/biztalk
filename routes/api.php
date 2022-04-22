@@ -64,6 +64,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('/my/videos', [ApiAuthController::class, 'user_videos']);
         Route::post('/my/private/videos', [ApiAuthController::class, 'user_privatevideos']);
         Route::post('/my/liked/videos', [ApiAuthController::class, 'user_likedvideos']);
+
+        Route::post('/follow', [ApiAuthController::class, 'follow']);
+        Route::post('/following/requests', [ApiAuthController::class, 'follow_requests']);
     });
 
 });

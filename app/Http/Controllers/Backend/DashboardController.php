@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\Comment;
 use App\Models\User;
 use App\Models\Video;
-use App\Models\Comment;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,11 +17,11 @@ class DashboardController extends Controller
     {
         $user_count = User::doesntHave('roles')->count();
         $video_count = Video::count();
-        $like_count =  \DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->count();
+        $like_count = \DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->count();
         $comment_count = Comment::count();
-        $recent_users= User::doesntHave('roles')->latest()->take(5)->get();
+        $recent_users = User::doesntHave('roles')->latest()->take(5)->get();
         // dd($recent_users);
-        return view('Backend.pages.index',compact('user_count','video_count','like_count','comment_count','recent_users'));
+        return view('Backend.pages.index', compact('user_count', 'video_count', 'like_count', 'comment_count', 'recent_users'));
 
     }
     public function userindex()
@@ -194,22 +194,27 @@ class DashboardController extends Controller
                         $video = "-";
                         return $video;
                     } else {
-                        $video = " <video
-                        id='my-video'
-                        class='video-js'
-                        controls
-                        preload='auto'
-                        width='640'
-                        height='264'
-                        poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'
-                        data-setup='{}'
-                        style='border-radius: 10px;'
-                      >
+                        $video = "<video id='player' class='video-js' playsinline controls data-poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'>
                         <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
+                        
 
+                        
+                      </video>";
+                        //     $video = " <video
+                        //     id='my-video'
+                        //     class='video-js'
+                        //     controls
+                        //     preload='auto'
+                        //     width='640'
+                        //     height='264'
+                        //     poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'
+                        //     data-setup='{}'
+                        //     style='border-radius: 10px;'
+                        //   >
+                        //     <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
 
-                      </video>
-                    ";
+                        //   </video>
+                        // ";
                         return $video;
                     }
 

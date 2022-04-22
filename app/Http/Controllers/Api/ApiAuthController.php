@@ -823,18 +823,60 @@ class ApiAuthController extends Controller
                 })->get();
             }
             $video = Video::where(function ($query) use ($names) {
-                foreach($names as $k){
-                $query->orWhere('video_title', 'like', '%' . $k . '%');
-                $query->orWhere('video_description', 'like', '%' . $k . '%');
+                foreach ($names as $k) {
+                    $query->orWhere('video_title', 'like', '%' . $k . '%');
+                    $query->orWhere('video_description', 'like', '%' . $k . '%');
                     $query->orWhere('hashtags', 'like', "%" . $k . "%");
                 }
             })->get();
-            $hashtag = Hashtag::where('name','like','%'.$search.'%')->get();
-            return $this->success(['users'=>new UserCollection($user),'videos'=>new VideoCollection($video),'hashtags'=>new HashtagCollection($hashtag)], 'video liked', 200);
+            $hashtag = Hashtag::where('name', 'like', '%' . $search . '%')->get();
+            return $this->success(['users' => new UserCollection($user), 'videos' => new VideoCollection($video), 'hashtags' => new HashtagCollection($hashtag)], 'video liked', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
 
+    }
+
+    public function follow(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $userid = User::find($request->get('user_id'));
+
+            $auth_user = Auth::user();
+
+            if ($auth_user->isFollowing($userid)) {
+                return $this->error('you already follow this user', 500);
+            } elseif ($auth_user->hasRequestedToFollow($userid)) {
+                return $this->error('your follow request is still in pending', 500);
+            } else {
+                $res = $auth_user->follow($userid);
+                if ($res) {
+                    return $this->success([], 'your follow request has been sent', 200);
+                }
+                return $this->success([], 'you are now following', 200);
+            }
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
+    public function follow_requests(Request $request)
+    {
+        $user = Auth::user();
+        // $list =  \DB::table('user_follower')->where('follower_id',Auth::user()->id)->whereNull('accepted_at')->get();
+        $list = $user->followings;
+        foreach ($list as $value) {
+           
+            if ($value->wherePivotNull('accepted_at')) {
+                $s[]=$value;
+            }
+        }
+
+        return $this->success([$s,$user->id], 'you are now following', 200);
     }
 
 }

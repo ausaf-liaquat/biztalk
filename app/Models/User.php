@@ -11,6 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Overtrue\LaravelFollow\Followable;
 
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, HasRoles, Followable;
@@ -83,5 +84,10 @@ class User extends Authenticatable
     public function providers()
     {
         return $this->hasMany(Provider::class, 'user_id', 'id');
+    }
+
+    public function needsToApproveFollowRequests(): bool
+    {
+        return $this->isaccount_public == 0 ?true:false;
     }
 }
