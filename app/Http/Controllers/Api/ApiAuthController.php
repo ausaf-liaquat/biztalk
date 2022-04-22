@@ -866,17 +866,62 @@ class ApiAuthController extends Controller
     }
     public function follow_requests(Request $request)
     {
-        $user = Auth::user();
-        // $list =  \DB::table('user_follower')->where('follower_id',Auth::user()->id)->whereNull('accepted_at')->get();
-        $list = $user->followings;
-        foreach ($list as $value) {
-           
-            if ($value->wherePivotNull('accepted_at')) {
-                $s[]=$value;
-            }
-        }
+        $token = $request->bearerToken();
 
-        return $this->success([$s,$user->id], 'you are now following', 200);
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+
+            $list = $user->notApprovedFollowings()->get();
+
+            return $this->success([new UserCollection($list)], 'you are now following', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function acceptfollow_requests(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+            $user_id = User::find($request->get('user_id'));
+            // $user->acceptFollowRequestFrom($user_id);
+            $hasRequest = $user_id->hasRequestedToFollow($user);
+
+            if ($hasRequest) {
+                $user->acceptFollowRequestFrom($user_id);
+
+                return $this->success([], 'Follow request accepted', 200);
+            } else {
+                return $this->error('no request found', 404);
+            }
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+
+    public function rejectfollow_requests(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+            $user_id = User::find($request->get('user_id'));
+            // $user->acceptFollowRequestFrom($user_id);
+            $hasRequest = $user_id->hasRequestedToFollow($user);
+
+            if ($hasRequest) {
+                $user->rejectFollowRequestFrom($user_id);
+
+                return $this->success([], 'Follow request rejected', 200);
+            } else {
+                return $this->error('no request found', 404);
+            }
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
     }
 
 }

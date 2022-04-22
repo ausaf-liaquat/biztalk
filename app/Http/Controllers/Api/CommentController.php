@@ -27,8 +27,8 @@ class CommentController extends Controller
         $video = Video::find($request->video_id);
 
         $video->comments()->save($comment);
-
-        return $this->success([], 'comment saved');
+       $total_comments= $video->allcomments->count();
+        return $this->success([$total_comments], 'comment saved');
     }
 
     public function replyStore(Request $request)
