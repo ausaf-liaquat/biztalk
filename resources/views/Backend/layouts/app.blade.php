@@ -41,6 +41,12 @@
         integrity="sha512-iuMkf48pM/TdH5DQkNPLWPLIUsVCncQEpuxgcMq/oDmJepdFcu48Wy4MwXggN9WFb4L6rpXQf5YJE/+OXkM1Lw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style type="text/css">
+        .video-js .vjs-control-bar { 
+                display: -webkit-box;
+                display: -webkit-flex;
+                display: -ms-flexbox;
+                display: flex;
+            }
         i.icons {
             display: inline-block;
             font-size: 20px;
@@ -139,7 +145,15 @@
         }
 
     </style>
+    <link href="https://vjs.zencdn.net/7.18.1/video-js.css" rel="stylesheet" />
+    <!-- Video.js base CSS -->
+    {{-- <link href="https://unpkg.com/video.js@7/dist/video-js.min.css" rel="stylesheet" /> --}}
 
+    <!-- City -->
+    {{-- <link href="https://unpkg.com/@videojs/themes@1/dist/city/index.css" rel="stylesheet" /> --}}
+
+    {{-- <link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/plyr.css" />
+<script src="https://cdn.plyr.io/3.7.2/plyr.js"></script> --}}
 </head>
 
 <body class="sidebar-dark">
@@ -157,6 +171,7 @@
             @include('Backend.partials.sidebar')
             <!-- partial -->
             <div class="main-panel">
+                
                 @yield('content')
 
                 <!-- content-wrapper ends -->

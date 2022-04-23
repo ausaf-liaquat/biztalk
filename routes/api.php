@@ -69,9 +69,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('/following/requests/list', [ApiAuthController::class, 'follow_requests']);
         Route::post('/accept/follow/request', [ApiAuthController::class, 'acceptfollow_requests']);
         Route::post('/reject/follow/request', [ApiAuthController::class, 'rejectfollow_requests']);
-
-
-
+        Route::post('/user/followers', [ApiAuthController::class, 'user_followers']);
+        Route::post('/user/followings', [ApiAuthController::class, 'user_followings']);
 
     });
 

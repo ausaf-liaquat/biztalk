@@ -194,27 +194,20 @@ class DashboardController extends Controller
                         $video = "-";
                         return $video;
                     } else {
-                        $video = "<video id='player' class='video-js' playsinline controls data-poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'>
-                        <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
-                        
 
-                        
-                      </video>";
-                        //     $video = " <video
-                        //     id='my-video'
-                        //     class='video-js'
-                        //     controls
-                        //     preload='auto'
-                        //     width='640'
-                        //     height='264'
-                        //     poster='" . asset('assets/images/BizTalk-Logo.jpeg') . "'
-                        //     data-setup='{}'
-                        //     style='border-radius: 10px;'
-                        //   >
-                        //     <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
+                        $video = " <video
+                            id='my-video'
+                            class='video-js vjs-theme-city'
+                            controls
+                            preload='auto'
+                            width='640'
+                            height='264'
+                            poster='" . asset('assets/images/Poster.png') . "'
+                            data-setup='{}'>
+                            <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
 
-                        //   </video>
-                        // ";
+                          </video>
+                        ";
                         return $video;
                     }
 

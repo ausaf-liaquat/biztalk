@@ -209,8 +209,8 @@ class ApiAuthController extends Controller
                 'gender' => Auth::user()->gender,
                 'is_verified' => Auth::user()->is_verified,
                 'total_like_received' => $like,
-                'followers_count' => Auth::user()->followers()->count(),
-                'followings_count' => Auth::user()->followings()->count(),
+                'followers_count' => Auth::user()->approvedFollowers()->count(),
+                'followings_count' => Auth::user()->approvedFollowings()->count(),
                 'profile_image' => asset('uploads/avtars/' . Auth::user()->profile_image),
             ];
 
@@ -449,7 +449,7 @@ class ApiAuthController extends Controller
             // }
 
             // return $this->success([$v_url], 'Videos list', 200);
-            $videos = Video::with('comments')->latest()->get();
+            $videos = Video::where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
 
             return $this->success(new VideoCollection($videos), 'Videos list', 200);
             // return new  VideoCollection(Video::all());
@@ -923,5 +923,32 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
     }
+    public function user_followers(Request $request)
+    {
+        $token = $request->bearerToken();
 
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+            $userList = $user->approvedFollowers()->get();
+            return $this->success(['followers_list' => new UserCollection($userList)], 'Followers', 200);
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
+    public function user_followings(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+            $userList = $user->approvedFollowings()->get();
+            return $this->success(['followings_list' => new UserCollection($userList)], 'Followers', 200);
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
 }

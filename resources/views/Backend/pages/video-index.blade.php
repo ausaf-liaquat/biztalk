@@ -10,6 +10,7 @@
                             Add class <code>.table-striped</code>
                         </p> --}}
                         <div class="table-responsive">
+
                             <table class="table table-striped" id="video_table">
                                 <thead>
                                     <tr>
@@ -43,7 +44,7 @@
                                         <th>
                                             Posted at
                                         </th>
-                                        
+
 
                                     </tr>
                                 </thead>
@@ -89,7 +90,7 @@
                         name: 'video',
 
                     },
-                     {
+                    {
                         data: 'action',
                         name: 'action',
 
@@ -124,7 +125,7 @@
                         name: 'created_at',
 
                     },
-                   
+
                 ],
                 'responsive': true,
                 "ordering": false,

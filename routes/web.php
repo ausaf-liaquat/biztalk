@@ -78,5 +78,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/banners/show', [DashboardController::class, 'banners'])->name('banners.index');
     Route::post('/banner/store', [DashboardController::class, 'bannerstore'])->name('banners.store');
 
+    Route::get('/video/streaming/{path}', [DashboardController::class, 'videoStreaming'])->name('video.streaming');
+
 });
 require __DIR__ . '/auth.php';
