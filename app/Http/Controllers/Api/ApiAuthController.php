@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentCollection;
 use App\Http\Resources\HashtagCollection;
 use App\Http\Resources\UserCollection;
+use App\Http\Resources\UserResource;
 use App\Http\Resources\VideoCollection;
 use App\Models\Banner;
 use App\Models\Comment;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Models\Video;
 use App\Models\VideoView;
 use App\Traits\ApiResponser;
+// use FFMpeg\FFMpeg;
 use Helper;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
+use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 use Twilio\Rest\Client;
 
 class ApiAuthController extends Controller
@@ -346,10 +349,23 @@ class ApiAuthController extends Controller
 
                     ]);
                     $file = $request->file('file');
-                    $filename = Auth::user()->id . '_' . rand(000, 999) . '_' . $file->getClientOriginalName();
+                    $filename = 'short_video_' . Auth::user()->id . '_' . rand(000000, 999999) . '.' . $file->getClientOriginalExtension();
                     $data = file_get_contents($file);
                     Storage::disk('public')->put('videos/' . $filename, $data);
                     $video->video_name = $filename;
+                    $video->save();
+
+                    $thumbnail_name = 'video_thumbnail_' . $video->id . '_' . rand(000000, 999999) . '.png';
+
+                    (new MediaOpener)
+                        ->open($file)
+                        ->getFrameFromSeconds(2)
+                        ->export()
+                        ->accurate()
+                        ->toDisk('public')
+                        ->save('thumbnail/' . $thumbnail_name);
+
+                    $video->video_poster = $thumbnail_name;
                     $video->save();
 
                     $checkhashtag = Hashtag::pluck('name')->toArray();
@@ -409,46 +425,7 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-            // $videos = Video::latest()->get();
-            // $v_url = array();
-            // foreach ($videos as $i) {
 
-            //     $v_url[] = [
-            //         'video_id' => $i->id,
-            //         'title' => $i->video_title,
-            //         'description' => $i->video_description,
-            //         'investment_req' => $i->investment_req,
-            //         'allow_comment' => $i->allow_comment,
-            //         'user_id' => $i->users->id,
-            //         'username' => $i->users->username,
-            //         'user_name' => $i->users->first_name . ' ' . $i->users->last_name,
-            //         'total_comments' => $i->allcomments->count(),
-            //         'urls' => asset('uploads/videos/' . $i->video_name),
-            //         'video_comments' => $i->comments,
-            //     ];
-
-            //     $users = array();
-            //     foreach ($i->allcomments as $comment) {
-            //         $comment->user->username;
-            //         $user[] = ['username' => $comment->user->username,
-            //             'profile_image' => $comment->user->profile_image,
-            //         ];
-            //     }
-            //     $replies = array();
-            //     foreach ($i->comments as $comment) {
-            //         $replies[] = $comment->replies;
-            //         $userreply = array();
-            //         foreach ($comment->replies as $reply) {
-            //             $nestreplies = array();
-            //             foreach ($reply->childrenReplies as $key) {
-            //                $nestreplies[]=$key;
-            //             }
-            //             $userreply[] = ['username' => $reply->username, 'profile_image' => $reply->profile_image];
-            //         }
-            //     }
-            // }
-
-            // return $this->success([$v_url], 'Videos list', 200);
             $videos = Video::where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
 
             return $this->success(new VideoCollection($videos), 'Videos list', 200);
@@ -461,13 +438,7 @@ class ApiAuthController extends Controller
     {
         $video = Video::find($request->get('id'));
         if ($video != null) {
-            // $video->whereHas('comments', function ($query) {
-            //     $query->where('user_id', Auth::user()->id);
-            // });
-            // $replies = array();
-            // foreach ($video->comments as $comment) {
-            //     $replies[] = $comment->replies;
-            // }
+
             return $this->success(['video_comments' => new CommentCollection($video->comments)], 'video with comments and replies');
         } else {
             return $this->error('No video found', 404);
@@ -871,9 +842,23 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $user = Auth::user();
 
+            $list = $user->notApprovedFollowers()->get();
+
+            return $this->success([new UserCollection($list)], 'not approved followers requests', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+      public function followings_requests(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+
             $list = $user->notApprovedFollowings()->get();
 
-            return $this->success([new UserCollection($list)], 'you are now following', 200);
+            return $this->success([new UserCollection($list)], 'not approved followings requests', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -944,7 +929,66 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $user = Auth::user();
             $userList = $user->approvedFollowings()->get();
+
             return $this->success(['followings_list' => new UserCollection($userList)], 'Followers', 200);
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
+    public function user_followings_video_list(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $user = Auth::user();
+            $userList = $user->approvedFollowings()->get();
+            foreach ($userList as $item) {
+                $user_id[] = $item->id;
+            }
+            $videos = Video::whereIn('user_id', $user_id)->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+            return $this->success([new VideoCollection($videos), $user_id], 'Followings videos', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function video_userdetails(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $user_id = $request->get('user_id');
+
+            $userdetails = User::find($user_id);
+
+            foreach ($userdetails->videos as $video) {
+                $user_videos[] = $video->id;
+            }
+            $like = DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->whereIn('likeable_id', $user_videos)->count();
+            $user[] = [
+                'user_id' => $userdetails->id,
+                'first_name' => $userdetails->first_name,
+                'last_name' => $userdetails->last_name,
+                'username' => $userdetails->username,
+                'email' => $userdetails->email,
+                'phone_no' => $userdetails->phone_no,
+                'location' => $userdetails->location,
+                'country' => $userdetails->country,
+                'dob' => $userdetails->dob,
+                'gender' => $userdetails->gender,
+                'is_verified' => $userdetails->is_verified,
+                'total_like_received' => $like,
+                'followers_count' => $userdetails->approvedFollowers()->count(),
+                'followings_count' => $userdetails->approvedFollowings()->count(),
+                'profile_image' => asset('uploads/avtars/' . $userdetails->profile_image),
+            ];
+            $user_videos = $userdetails->videos->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1);
+
+            $userliked_videos = Video::whereLikedBy($userdetails->id)->with('likeCounter')->orderBy('created_at', 'DESC')->get();
+
+            return $this->success(['user_details'=>$user,'user_videos'=>new VideoCollection($user_videos),'user_liked_videos'=>new VideoCollection($userliked_videos)], 'user detail', 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);

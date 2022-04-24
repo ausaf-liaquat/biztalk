@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class VideoCollection extends ResourceCollection
 {
@@ -32,6 +33,7 @@ class VideoCollection extends ResourceCollection
                     'allow_comment' => $data->allow_comment,
                     'user_id' => $data->users->id,
                     'username' => $data->users->username,
+                    'isFollowing'=>Auth::user()->isFollowing(User::find($data->users->id)),
                     'user_name' => $data->users->first_name . ' ' . $data->users->last_name,
                     'profile_image' => asset('uploads/avtars/' . $data->users->profile_image),
                     'total_comments' => $data->allcomments->count(),
@@ -41,9 +43,10 @@ class VideoCollection extends ResourceCollection
                     'created_at'=>$data->created_at,
                     'video_category'=>$data->video_category,
                     'urls' => asset('uploads/videos/' . $data->video_name),
+                    'thumbnail'=> asset('uploads/thumbnail/' . $data->video_poster),
                     'views_count'=>$data->view->count(),
                     'video_comments' => new CommentCollection($data->comments),
-                    // 'comments_users'=>new UserCollection($data->comments),
+                    
                     // 'replies'=>new ReplyCollection($data->comments)
                 ];
             }),

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e0e47398eba4d3b2907ea8676036cd4",
+    "content-hash": "4569e3438487211d13921d6875766578",
     "packages": [
         {
             "name": "brick/math",
@@ -939,65 +939,6 @@
                 }
             ],
             "time": "2022-03-20T21:55:58+00:00"
-        },
-        {
-            "name": "imanghafoori/laravel-video",
-            "version": "v2.1.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/imanghafoori1/laravel-video.git",
-                "reference": "d6ae1e87bed0f4459de057aad9a6f19aec08c7ac"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/imanghafoori1/laravel-video/zipball/d6ae1e87bed0f4459de057aad9a6f19aec08c7ac",
-                "reference": "d6ae1e87bed0f4459de057aad9a6f19aec08c7ac",
-                "shasum": ""
-            },
-            "require": {
-                "laravel/framework": "~5.1|6.*|7.*|8.*|9.*",
-                "php": "7.2.*|7.3.*|7.4.*|8.0.*|8.1.*"
-            },
-            "require-dev": {
-                "mockery/mockery": "^0.9.9",
-                "orchestra/testbench": "~3.0"
-            },
-            "suggest": {
-                "imanghafoori/laravel-anypass": " Allows you login with any password in local environment.",
-                "imanghafoori/laravel-decorator": "Allows you to easily apply the decorator pattern.",
-                "imanghafoori/laravel-heyman": "It allows to write expressive code to authorize, validate and authenticate.",
-                "imanghafoori/laravel-masterpass": "You can easily set a master password without code change.",
-                "imanghafoori/laravel-terminator": "Gives you opportunity to refactor your controllers."
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Iman\\Streamer\\StreamServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Iman\\Streamer\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Iman Ghafoori",
-                    "email": "imanghafoori1@gmail.com"
-                }
-            ],
-            "description": "A laravel package to stream video content.",
-            "support": {
-                "issues": "https://github.com/imanghafoori1/laravel-video/issues",
-                "source": "https://github.com/imanghafoori1/laravel-video/tree/v2.1.3"
-            },
-            "time": "2022-02-09T20:54:43+00:00"
         },
         {
             "name": "laravel/framework",
@@ -2315,6 +2256,82 @@
                 }
             ],
             "time": "2022-04-06T07:48:01+00:00"
+        },
+        {
+            "name": "pbmedia/laravel-ffmpeg",
+            "version": "8.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/protonemedia/laravel-ffmpeg.git",
+                "reference": "50cd4ccfaed9fbdb33f87a325a76c42b1635606d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/protonemedia/laravel-ffmpeg/zipball/50cd4ccfaed9fbdb33f87a325a76c42b1635606d",
+                "reference": "50cd4ccfaed9fbdb33f87a325a76c42b1635606d",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.0",
+                "php": "^8.0|^8.1",
+                "php-ffmpeg/php-ffmpeg": "^1.0.1"
+            },
+            "require-dev": {
+                "league/flysystem-memory": "^3.0",
+                "mockery/mockery": "^1.3.3",
+                "orchestra/testbench": "^7.0",
+                "phpunit/phpunit": "^9.5.10",
+                "spatie/image": "^2.0",
+                "spatie/phpunit-snapshot-assertions": "^4.2"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ProtoneMedia\\LaravelFFMpeg\\Support\\ServiceProvider"
+                    ],
+                    "aliases": {
+                        "FFMpeg": "ProtoneMedia\\LaravelFFMpeg\\Support\\FFMpeg"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ProtoneMedia\\LaravelFFMpeg\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Pascal Baljet",
+                    "email": "pascal@protone.media",
+                    "homepage": "https://protone.media",
+                    "role": "Developer"
+                }
+            ],
+            "description": "FFMpeg for Laravel",
+            "homepage": "https://github.com/protonemedia/laravel-ffmpeg",
+            "keywords": [
+                "ffmpeg",
+                "laravel",
+                "laravel-ffmpeg",
+                "protone media",
+                "protonemedia"
+            ],
+            "support": {
+                "issues": "https://github.com/protonemedia/laravel-ffmpeg/issues",
+                "source": "https://github.com/protonemedia/laravel-ffmpeg/tree/8.0.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/pascalbaljet",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-02-22T16:20:41+00:00"
         },
         {
             "name": "php-ffmpeg/php-ffmpeg",
@@ -8850,5 +8867,5 @@
         "php": "^8.0.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }

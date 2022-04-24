@@ -35,6 +35,7 @@ class Video extends Model
         'total_comments',
         'total_shares',
         'total_likes',
+        'video_poster'
     ];
 
     public function users()
