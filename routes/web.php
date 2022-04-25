@@ -78,7 +78,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/banners/show', [DashboardController::class, 'banners'])->name('banners.index');
     Route::post('/banner/store', [DashboardController::class, 'bannerstore'])->name('banners.store');
 
+    Route::get('/hashtags', [DashboardController::class, 'hashtags'])->name('hashtags.index');
+    Route::get('/hashtags/data', [DashboardController::class, 'hashtagsdata'])->name('hashtags.data');
+
     Route::get('/video/streaming/{path}', [DashboardController::class, 'videoStreaming'])->name('video.streaming');
+
+
 
 });
 require __DIR__ . '/auth.php';

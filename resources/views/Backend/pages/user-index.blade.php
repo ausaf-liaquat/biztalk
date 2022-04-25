@@ -27,17 +27,15 @@
                                         </th>
                                         <th>
                                             Email
-                                        </th> 
-                                        <th>
-                                            Actions
                                         </th>
+
                                         <th>
                                             Status
                                         </th>
+
                                         <th>
-                                            Joined Date
+                                            Actions
                                         </th>
-                                       
 
                                     </tr>
                                 </thead>
@@ -95,23 +93,18 @@
 
                     },
                     {
-                        data: 'action',
-                        name: 'action',
-
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-
-                    },
-                    {
                         data: 'joineddate',
                         name: 'joineddate',
 
                     },
-                    
+                    {
+                        data: 'action',
+                        name: 'action',
+
+                    },
+
                 ],
-                'responsive': true,
+                'responsive': false,
                 "ordering": false,
                 "lengthChange": false,
                 "pageLength": 10,
@@ -121,8 +114,6 @@
             $('#table_id_search').keyup(function() {
                 table.search($(this).val()).draw();
             })
-
-
         });
     </script>
     <script>

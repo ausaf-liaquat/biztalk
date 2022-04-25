@@ -7,6 +7,7 @@ use App\Models\Banner;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Video;
+use App\Models\Hashtag;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -56,12 +57,25 @@ class DashboardController extends Controller
                     return $username;
                 })
                 ->addColumn('phone', function ($row) {
-                    $phoneno = $row->phone_no;
+                    if ($row->phone_no==null) {
+                        return  "N/A";
+                    } else {
+                         $phoneno = $row->phone_no;
                     return $phoneno;
+                    }
+                    
+                   
                 })
                 ->addColumn('email', function ($row) {
-                    $email = $row->email;
-                    return $email;
+                    
+                    if ($row->email == null) {
+                        return "N/A";
+                    } else {
+                        $email = $row->email;
+                       return $email;
+                    }
+                    
+                    
                 })
                 ->addColumn('status', function ($row) {
                     if ($row->is_verified == "pending") {
@@ -82,9 +96,9 @@ class DashboardController extends Controller
 
                 ->addColumn('action', function ($row) {
 
-                    return $action = "<a class='btn btn-primary btn-rounded btn-icon action-btn' href='" . route('user.edit', ['id' => $row->id]) . "'>
+                    return $action = "<a class='btn btn-primary btn-icon ' href='" . route('user.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
-                    <a class='btn btn-danger btn-rounded btn-icon action-btn' id='delete' onclick='deleteUser(this)' data-id='" . $row->id . "'>
+                    <a class='btn btn-danger btn-icon' id='delete' onclick='deleteUser(this)' data-id='" . $row->id . "'>
                     Delete <i class='ti-trash btn-icon-append icons-table'></i></a>
                     ";
 
@@ -191,7 +205,7 @@ class DashboardController extends Controller
                 })
                 ->addColumn('video', function ($row) {
                     if ($row->video_name == null) {
-                        $video = "-";
+                        $video = "N/A";
                         return $video;
                     } else {
 
@@ -227,7 +241,7 @@ class DashboardController extends Controller
                         $video_category = $row->video_category;
 
                     } else {
-                        $video_category = "-";
+                        $video_category = "N/A";
                     }
 
                     return $video_category;
@@ -264,7 +278,7 @@ class DashboardController extends Controller
 
                 ->addColumn('action', function ($row) {
 
-                    return $action = "<a class='btn btn-primary btn-rounded btn-icon action-btn' href='" . route('video.edit', ['id' => $row->id]) . "'>
+                    return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
 
                 })
@@ -315,5 +329,40 @@ class DashboardController extends Controller
         }
 
         return redirect()->back()->with('success', 'Banners updated');
+    }
+    public function hashtags()
+    {
+        return view('Backend.pages.hashtag');
+    }
+    public function hashtagsdata(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Hashtag::orderby('views','desc')->latest()->get();
+            return DataTables::of($data)
+            ->addIndexColumn()
+                ->addColumn('hashtag_title', function ($row) {
+                    $title = '#'.$row->name;
+                    return $title;
+                })
+                ->addColumn('total_videos', function ($row) {
+                    $total_videos = $row->videos->count();
+                    return $total_videos;
+                })
+                ->addColumn('total_views', function ($row) {
+                    $total_views = $row->views;
+                    return $total_views;
+                })
+                // ->addColumn('action', function ($row) {
+
+                //     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
+                //     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
+
+                // })
+
+                ->rawColumns(['hashtag_title', 'total_videos', 'total_views'])
+                ->make(true);
+
+        }
+        
     }
 }

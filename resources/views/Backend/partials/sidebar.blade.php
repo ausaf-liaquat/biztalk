@@ -25,9 +25,21 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('hashtags.index') }}">
+                <i class="fa-solid fa-hashtag menu-icon"></i>
+                <span class="menu-title">Hashtag</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="mdi mdi-information menu-icon"></i>
                 <span class="menu-title">Tickets System</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="fa-solid fa-ban menu-icon"></i>
+                <span class="menu-title">Reported User</span>
             </a>
         </li>
         <li class="nav-item">

@@ -24,9 +24,9 @@
                                             Video
                                         </th>
                                         <th>
-                                            Actions
+                                            Posted by user
                                         </th>
-                                        <th>
+                                        {{-- <th>
                                             Investment Required
                                         </th>
                                         <th>
@@ -38,13 +38,13 @@
                                         <th>
                                             Is Video Flagged?
                                         </th>
-                                        <th>
-                                            Posted by user
-                                        </th>
+                                       
                                         <th>
                                             Posted at
+                                        </th> --}}
+                                        <th>
+                                            Actions
                                         </th>
-
 
                                     </tr>
                                 </thead>
@@ -90,44 +90,45 @@
                         name: 'video',
 
                     },
-                    {
-                        data: 'action',
-                        name: 'action',
 
-                    },
-                    {
-                        data: 'investment_req',
-                        name: 'investment_req',
+                    // {
+                    //     data: 'investment_req',
+                    //     name: 'investment_req',
 
-                    },
-                    {
-                        data: 'video_category',
-                        name: 'video_category',
+                    // },
+                    // {
+                    //     data: 'video_category',
+                    //     name: 'video_category',
 
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
+                    // },
+                    // {
+                    //     data: 'status',
+                    //     name: 'status',
 
-                    },
-                    {
-                        data: 'flagged_video',
-                        name: 'flagged_video',
+                    // },
+                    // {
+                    //     data: 'flagged_video',
+                    //     name: 'flagged_video',
 
-                    },
+                    // },
                     {
                         data: 'user',
                         name: 'user',
 
                     },
+                    // {
+                    //     data: 'created_at',
+                    //     name: 'created_at',
+
+                    // },
                     {
-                        data: 'created_at',
-                        name: 'created_at',
+                        data: 'action',
+                        name: 'action',
 
                     },
 
                 ],
-                'responsive': true,
+                'responsive': false,
                 "ordering": false,
                 "lengthChange": false,
                 "pageLength": 10,

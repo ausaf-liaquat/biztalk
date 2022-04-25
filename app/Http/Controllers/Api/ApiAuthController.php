@@ -137,26 +137,14 @@ class ApiAuthController extends Controller
     }
     public function forget_password(Request $request)
     {
+        
+        $credentials = request()->validate(['email' => 'required|email']);
 
-        $input = $request->only('email');
-        $validator = Validator::make($input, [
-            'email' => "required|email",
-        ]);
-        if ($validator->fails()) {
-            return response(['status' => Helper::ApiErrorStatus(), 'errors' => $validator->errors()->all()], 422);
-        }
-        $response = Password::sendResetLink($input);
-        if ($response == Password::RESET_LINK_SENT) {
-            $message = "Mail send successfully";
+        Password::sendResetLink($credentials);
 
-            return $this->success([], $message, 200);
-        } else {
-            return $this->error('Something went wrong', 500, []);
-        }
-        //$message = $response == Password::RESET_LINK_SENT ? 'Mail send successfully' : GLOBAL_SOMETHING_WANTS_TO_WRONG;
-        // $response = ["status" => Helper::ApiSuccessStatus(), 'data' => '', 'message' => $message];
-        // return response($response, 200);
-
+     
+        return $this->success([], 'Reset password link sent on your email id', 200);
+        
     }
     public function newPassword(Request $request)
     {
