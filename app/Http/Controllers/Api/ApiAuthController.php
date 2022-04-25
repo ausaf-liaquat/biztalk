@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CommentCollection;
 use App\Http\Resources\HashtagCollection;
 use App\Http\Resources\UserCollection;
-use App\Http\Resources\UserResource;
 use App\Http\Resources\VideoCollection;
 use App\Models\Banner;
 use App\Models\Comment;
@@ -14,8 +13,9 @@ use App\Models\OtpPhone;
 use App\Models\User;
 use App\Models\Video;
 use App\Models\VideoView;
-use App\Traits\ApiResponser;
+use App\Notifications\LikeNotification;
 // use FFMpeg\FFMpeg;
+use App\Traits\ApiResponser;
 use Helper;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Laravel\Socialite\Facades\Socialite;
 use ProtoneMedia\LaravelFFMpeg\MediaOpener;
 use Twilio\Rest\Client;
@@ -137,14 +136,13 @@ class ApiAuthController extends Controller
     }
     public function forget_password(Request $request)
     {
-        
+
         $credentials = request()->validate(['email' => 'required|email']);
 
         Password::sendResetLink($credentials);
 
-     
         return $this->success([], 'Reset password link sent on your email id', 200);
-        
+
     }
     public function newPassword(Request $request)
     {
@@ -527,7 +525,8 @@ class ApiAuthController extends Controller
                     return $this->success([], 'Video already liked', 200);
                 } else {
                     $video->like(Auth::user()->id);
-
+                    $user = User::find($video->users->id);
+                    $user->notify(new LikeNotification(Auth::user()));
                     return $this->success([], 'video liked', 200);
                 }
             } elseif ($request->get('response') == 0) {
@@ -837,7 +836,7 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
     }
-      public function followings_requests(Request $request)
+    public function followings_requests(Request $request)
     {
         $token = $request->bearerToken();
 
@@ -976,7 +975,7 @@ class ApiAuthController extends Controller
 
             $userliked_videos = Video::whereLikedBy($userdetails->id)->with('likeCounter')->orderBy('created_at', 'DESC')->get();
 
-            return $this->success(['user_details'=>$user,'user_videos'=>new VideoCollection($user_videos),'user_liked_videos'=>new VideoCollection($userliked_videos)], 'user detail', 200);
+            return $this->success(['user_details' => $user, 'user_videos' => new VideoCollection($user_videos), 'user_liked_videos' => new VideoCollection($userliked_videos)], 'user detail', 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);

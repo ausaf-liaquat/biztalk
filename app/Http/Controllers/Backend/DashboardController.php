@@ -265,8 +265,13 @@ class DashboardController extends Controller
                     return $status;
                 })
                 ->addColumn('user', function ($row) {
-
-                    $user = '@' . $row->users->username;
+                    if ($row->users->username == null) {
+                        $user = $row->users->first_name.' '.$row->users->last_name;
+                    } else {
+                        $user = '@' . $row->users->username;
+                    }
+                    
+                    
 
                     return $user;
                 })
@@ -279,7 +284,9 @@ class DashboardController extends Controller
                 ->addColumn('action', function ($row) {
 
                     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
-                    Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
+                    Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
+                    <a class='btn btn-danger btn-icon' data-bs-toggle='modal' data-bs-target='#exampleModal' data-id='" . $row->id . "'>
+                    View details <i class='ti-trash btn-icon-append icons-table'></i></a>";
 
                 })
 
