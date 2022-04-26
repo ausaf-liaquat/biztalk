@@ -76,6 +76,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('/user/followings/videos/list', [ApiAuthController::class, 'user_followings_video_list']);
 
         Route::post('/video/user/details', [ApiAuthController::class, 'video_userdetails']);
+        Route::post('/hashtag/search', [ApiAuthController::class, 'hashtag_search']);
     });
 
 });

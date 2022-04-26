@@ -10,16 +10,17 @@ use Illuminate\Notifications\Notification;
 class FollowNotification extends Notification
 {
     use Queueable;
-
+    public $user;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($user)
     {
-        //
+        $this->user = $user;
     }
+
 
     /**
      * Get the notification's delivery channels.
@@ -29,7 +30,7 @@ class FollowNotification extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -55,7 +56,10 @@ class FollowNotification extends Notification
     public function toArray($notifiable)
     {
         return [
-            //
+            'username'=>$this->user->username,
+            'profile_img'=>asset('uploads/avtars/'.$this->user->profile_image),
+            'followed_on'=>now(),
+            'message'=>$this->user->username.' started following you'
         ];
     }
 }

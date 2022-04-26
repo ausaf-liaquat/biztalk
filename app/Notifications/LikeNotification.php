@@ -11,14 +11,16 @@ class LikeNotification extends Notification
 {
     use Queueable;
     public $user;
+    public $video;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($user)
+    public function __construct($user,$video)
     {
         $this->user = $user;
+        $this->video = $video;
     }
 
     /**
@@ -57,7 +59,9 @@ class LikeNotification extends Notification
         return [
             'username'=>$this->user->username,
             'profile_img'=>asset('uploads/avtars/'.$this->user->profile_image),
-            'message'=>$this->user->username.'Liked your video'
+            'liked_on'=>now(),
+            'video_id'=>$this->video->id,
+            'message'=>$this->user->username.' Liked your video'
         ];
     }
 }

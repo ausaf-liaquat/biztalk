@@ -41,12 +41,17 @@
         integrity="sha512-iuMkf48pM/TdH5DQkNPLWPLIUsVCncQEpuxgcMq/oDmJepdFcu48Wy4MwXggN9WFb4L6rpXQf5YJE/+OXkM1Lw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style type="text/css">
-        .video-js .vjs-control-bar { 
-                display: -webkit-box;
-                display: -webkit-flex;
-                display: -ms-flexbox;
-                display: flex;
-            }
+        .table {
+            text-align: center;
+        }
+
+        .video-js .vjs-control-bar {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
         i.icons {
             display: inline-block;
             font-size: 20px;
@@ -171,7 +176,7 @@
             @include('Backend.partials.sidebar')
             <!-- partial -->
             <div class="main-panel">
-                
+
                 @yield('content')
 
                 <!-- content-wrapper ends -->
@@ -191,7 +196,7 @@
     <!-- Plugin js for this page -->
     <script src="{{ asset('assets/vendors/chart.js/Chart.min.js') }}"></script>
     <script src="{{ asset('assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
-    <script src="{{ asset('assets/vendors/progressbar.js/progressbar.min.js') }}"></script>
+    {{-- <script src="{{ asset('assets/vendors/progressbar.js/progressbar.min.js') }}"></script> --}}
 
     <!-- End plugin js for this page -->
     <!-- inject:js -->

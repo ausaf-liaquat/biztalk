@@ -13,6 +13,8 @@ use App\Models\OtpPhone;
 use App\Models\User;
 use App\Models\Video;
 use App\Models\VideoView;
+use App\Notifications\AcceptFollowNotification;
+use App\Notifications\FollowNotification;
 use App\Notifications\LikeNotification;
 // use FFMpeg\FFMpeg;
 use App\Traits\ApiResponser;
@@ -526,7 +528,10 @@ class ApiAuthController extends Controller
                 } else {
                     $video->like(Auth::user()->id);
                     $user = User::find($video->users->id);
-                    $user->notify(new LikeNotification(Auth::user()));
+                    if (Auth::user()->id != $user->id) {
+                        $user->notify(new LikeNotification(Auth::user(), $video));
+                    }
+
                     return $this->success([], 'video liked', 200);
                 }
             } elseif ($request->get('response') == 0) {
@@ -786,7 +791,7 @@ class ApiAuthController extends Controller
                     $query->orWhere('video_description', 'like', '%' . $k . '%');
                     $query->orWhere('hashtags', 'like', "%" . $k . "%");
                 }
-            })->get();
+            })->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
             $hashtag = Hashtag::where('name', 'like', '%' . $search . '%')->get();
             return $this->success(['users' => new UserCollection($user), 'videos' => new VideoCollection($video), 'hashtags' => new HashtagCollection($hashtag)], 'video liked', 200);
         } else {
@@ -794,7 +799,6 @@ class ApiAuthController extends Controller
         }
 
     }
-
     public function follow(Request $request)
     {
         $token = $request->bearerToken();
@@ -811,6 +815,7 @@ class ApiAuthController extends Controller
                 return $this->error('your follow request is still in pending', 500);
             } else {
                 $res = $auth_user->follow($userid);
+                $userid->notify(new FollowNotification($userid));
                 if ($res) {
                     return $this->success([], 'your follow request has been sent', 200);
                 }
@@ -862,7 +867,7 @@ class ApiAuthController extends Controller
 
             if ($hasRequest) {
                 $user->acceptFollowRequestFrom($user_id);
-
+                $user_id->notify(new AcceptFollowNotification($user));
                 return $this->success([], 'Follow request accepted', 200);
             } else {
                 return $this->error('no request found', 404);
@@ -872,7 +877,6 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
     }
-
     public function rejectfollow_requests(Request $request)
     {
         $token = $request->bearerToken();
@@ -976,6 +980,21 @@ class ApiAuthController extends Controller
             $userliked_videos = Video::whereLikedBy($userdetails->id)->with('likeCounter')->orderBy('created_at', 'DESC')->get();
 
             return $this->success(['user_details' => $user, 'user_videos' => new VideoCollection($user_videos), 'user_liked_videos' => new VideoCollection($userliked_videos)], 'user detail', 200);
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
+    public function hashtag_search(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $hashtag = $request->get('hashtag_name');
+            $videos = Video::where('hashtags','like', '%'.$hashtag.'%')->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+            return $this->success(['hashtag_videos' => new VideoCollection($videos)], 'Hashtag Videos list', 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);

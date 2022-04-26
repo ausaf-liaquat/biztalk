@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use App\Models\User;
 use App\Models\Video;
+use App\Notifications\VideoCommentNotification;
 use App\Traits\ApiResponser;
+use Auth;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
@@ -25,9 +28,13 @@ class CommentController extends Controller
         $comment->user()->associate($request->user());
 
         $video = Video::find($request->video_id);
-
+        $user = User::find($video->users->id);
         $video->comments()->save($comment);
-       $total_comments= $video->allcomments->count();
+        if (Auth::user()->id != $user->id) {
+            $user->notify(new VideoCommentNotification(Auth::user(), $comment,$video));
+        }
+
+        $total_comments = $video->allcomments->count();
         return $this->success([$total_comments], 'comment saved');
     }
 

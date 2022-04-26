@@ -3,7 +3,8 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
-
+use App\Models\User;
+use Auth;
 class UserCollection extends ResourceCollection
 {
     /**
@@ -20,6 +21,9 @@ class UserCollection extends ResourceCollection
                     'user_id'=>$data->id,
                     'username' => $data->username,
                     'full_name'=> $data->first_name.' '.$data->last_name,
+                    'followers_count'=>$data->approvedFollowers()->count(),
+                    'followings_count'=>$data->approvedFollowings()->count(),
+                    'is_following'=>Auth::user()->isFollowing(User::find($data->id)),
                     'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
                 ];
             }),

@@ -208,25 +208,41 @@ class DashboardController extends Controller
                         $video = "N/A";
                         return $video;
                     } else {
-
-                        $video = " <video
+                        if ($row->video_poster != null) {
+                            $video = " <video
                             id='my-video'
                             class='video-js vjs-theme-city'
                             controls
                             preload='auto'
                             width='640'
                             height='264'
-                            poster='" . asset('assets/images/Poster.png') . "'
+                            poster='" . asset('uploads/thumbnail/'.$row->video_poster) . "'
                             data-setup='{}'>
                             <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
 
                           </video>
                         ";
+                        } else {
+                            $video = " <video
+                            id='my-video'
+                            class='video-js vjs-theme-city'
+                            controls
+                            preload='auto'
+                            width='640'
+                            height='264'
+                            poster='" . asset('uploads/thumbnail/Poster.png') . "'
+                            data-setup='{}'>
+                            <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
+
+                          </video>
+                        ";
+                        }
+                        
+                        
                         return $video;
                     }
 
                 })
-
                 ->addColumn('investment_req', function ($row) {
                     if ($row->investment_req == 0) {
                         $investment_req = "No";
@@ -280,21 +296,35 @@ class DashboardController extends Controller
                     return $created_at;
 
                 })
-
                 ->addColumn('action', function ($row) {
 
                     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
-                    <a class='btn btn-danger btn-icon' data-bs-toggle='modal' data-bs-target='#exampleModal' data-id='" . $row->id . "'>
-                    View details <i class='ti-trash btn-icon-append icons-table'></i></a>";
+                    <a class='btn btn-danger btn-icon' data-bs-toggle='modal' 
+                    onclick='viewdetails(event.target)' data-bs-target='#exampleModal' data-id='" . $row->id . "'>
+                    View </a>";
 
                 })
-
                 ->rawColumns(['video_title', 'video_description', 'video', 'investment_req', 'video_category', 'status', 'flagged_video', 'user', 'created_at', 'action'])
                 ->make(true);
 
         }
 
+    }
+    public function videodetails($id)
+    {
+        $video = Video::where('id',$id)->with('allcomments')->first();
+        $video_details= [
+            'investment_req'=>$video->investment_req,
+            'category'=>$video->video_category!=null?$video->video_category:'N/A' ,
+            'is_approved'=>$video->is_approved,
+            'is_flagged'=>$video->is_flagged,
+            'posted_at'=>$video->created_at->format('d/m/Y'),
+            'total_likes'=>$video->like_count,
+            'total_comments'=>$video->allcomments->count(),
+            'total_views'=>$video->view->count()
+        ];
+        return response()->json(['video_details'=>$video_details], 200);
     }
     public function videoedit($id)
     {

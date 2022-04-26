@@ -26,22 +26,7 @@
                                         <th>
                                             Posted by user
                                         </th>
-                                        {{-- <th>
-                                            Investment Required
-                                        </th>
-                                        <th>
-                                            Category
-                                        </th>
-                                        <th>
-                                            Is Video Approved?
-                                        </th>
-                                        <th>
-                                            Is Video Flagged?
-                                        </th>
-                                       
-                                        <th>
-                                            Posted at
-                                        </th> --}}
+                                      
                                         <th>
                                             Actions
                                         </th>
@@ -64,13 +49,15 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Video details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+
                     <div class="table-responsive">
 
                         <table class="table table-striped" id="video_table">
+
                             <thead>
                                 <tr>
                                     <th>
@@ -85,36 +72,43 @@
                                     <th>
                                         Is Video Flagged?
                                     </th>
-                                   
+
                                     <th>
                                         Posted at
-                                    </th> 
+                                    </th>
 
                                     <th>
                                         Total Likes
                                     </th>
-                                   
+
                                     <th>
                                         Total Comments
-                                    </th> 
+                                    </th>
                                     <th>
                                         Total Views
-                                    </th> 
+                                    </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <div class="spinner" id="loader">
+                                {{-- <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div> --}}
+                                <img src="{{ asset('assets/images/loader.gif') }}" alt="" srcset="">
+                            </div>
+                            <tbody id="tbody">
 
 
                             </tbody>
                         </table>
                     </div>
                 </div>
-              
+
             </div>
         </div>
     </div>
 @endsection
 @section('extrajs')
+    <script src="{{ asset('assets/js/jquery-dateformat.min.js') }}"></script>
     <script>
         $(document).ready(function() {
 
@@ -195,5 +189,46 @@
 
 
         });
+    </script>
+    <script>
+        function viewdetails(e) {
+            var id = $(e).data("id");
+            var $loading = $('#loader');
+            var url = '{{ route('video.details', ':id') }}';
+            url = url.replace(':id', id);
+           
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: 'json',
+                // beforeSend: function() { // Before we send the request, remove the .hidden class from the spinner and default to inline-block.
+                //     $loading.show();
+                // },
+                success: function(data) {
+                    // On Success, build our rich list up and append it to the #richList div.
+                    $("#tbody").empty();
+
+
+                    $("#tbody").append("<tr><td>" + data.video_details.investment_req + "</td><td>" + data
+                        .video_details
+                        .category +
+                        "</td><td>" + data.video_details.is_approved + "</td><td>" + data.video_details
+                        .is_flagged +
+                        "</td><td>" + data.video_details.posted_at +
+                        "</td><td>" + data.video_details.total_likes +
+                        "</td><td>" + data.video_details.total_comments +
+                        "</td><td>" + data.video_details.total_views +
+                        "</td></tr>");
+
+
+                    $('#exampleModal').modal('show');
+                },
+                complete: function() { // Set our complete callback, adding the .hidden class and hiding the spinner.
+                    $loading.hide();
+                },
+            });
+
+
+        }
     </script>
 @endsection
