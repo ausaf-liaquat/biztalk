@@ -989,11 +989,20 @@ class ApiAuthController extends Controller
     public function hashtag_search(Request $request)
     {
         $token = $request->bearerToken();
-
+        $names = explode(" ", $request->get('hashtag_name'));
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
-            $hashtag = $request->get('hashtag_name');
-            $videos = Video::where('hashtags','like', '%'.$hashtag.'%')->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+
+            $videos = Video::where(function ($query) use ($names) {
+                foreach ($names as $k) {
+                    // $query->orWhere('video_title', 'like', '%' . $k . '%');
+                    // $query->orWhere('video_description', 'like', '%' . $k . '%');
+                    $query->orWhere('hashtags', 'like', "%" . $k . "%");
+                }
+            })->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+
+            // $hashtag = $request->get('hashtag_name');
+            // $videos = Video::where('hashtags','like', '%'.$hashtag.'%')->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
             return $this->success(['hashtag_videos' => new VideoCollection($videos)], 'Hashtag Videos list', 200);
 
         } else {
