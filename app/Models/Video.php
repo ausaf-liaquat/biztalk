@@ -35,7 +35,8 @@ class Video extends Model
         'total_comments',
         'total_shares',
         'total_likes',
-        'video_poster'
+        'video_poster',
+        'category_id'
     ];
 
     public function users()
@@ -64,5 +65,9 @@ class Video extends Model
     public function view()
     {
         return $this->hasMany(VideoView::class);
+    }
+    public function category()
+    {
+        return $this->belongsTo(Category::class,'category_id');
     }
 }

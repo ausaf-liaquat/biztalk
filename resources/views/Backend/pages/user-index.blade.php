@@ -3,14 +3,14 @@
     <div class="content-wrapper">
         <div class="row">
             <div class="col-lg-12 grid-margin stretch-card">
-                <div class="card">
+                <div class="card card-rounded">
                     <div class="card-body">
                         <h4 class="card-title">Users Management</h4>
                         {{-- <p class="card-description">
                             Add class <code>.table-striped</code>
                         </p> --}}
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="user_table">
+                        <div class="table-responsive mt-1">
+                            <table class="table table-striped select-table" id="user_table">
                                 <thead>
                                     <tr>
                                         <th>

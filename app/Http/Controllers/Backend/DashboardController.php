@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Banner;
+use App\Models\Category;
 use App\Models\Comment;
+use App\Models\Hashtag;
 use App\Models\User;
 use App\Models\Video;
-use App\Models\Hashtag;
 use DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +30,6 @@ class DashboardController extends Controller
     {
         return view('Backend.pages.user-index');
     }
-
     public function userdata(Request $request)
     {
         if ($request->ajax()) {
@@ -57,25 +57,23 @@ class DashboardController extends Controller
                     return $username;
                 })
                 ->addColumn('phone', function ($row) {
-                    if ($row->phone_no==null) {
-                        return  "N/A";
+                    if ($row->phone_no == null) {
+                        return "N/A";
                     } else {
-                         $phoneno = $row->phone_no;
-                    return $phoneno;
+                        $phoneno = $row->phone_no;
+                        return $phoneno;
                     }
-                    
-                   
+
                 })
                 ->addColumn('email', function ($row) {
-                    
+
                     if ($row->email == null) {
                         return "N/A";
                     } else {
                         $email = $row->email;
-                       return $email;
+                        return $email;
                     }
-                    
-                    
+
                 })
                 ->addColumn('status', function ($row) {
                     if ($row->is_verified == "pending") {
@@ -216,7 +214,7 @@ class DashboardController extends Controller
                             preload='auto'
                             width='640'
                             height='264'
-                            poster='" . asset('uploads/thumbnail/'.$row->video_poster) . "'
+                            poster='" . asset('uploads/thumbnail/' . $row->video_poster) . "'
                             data-setup='{}'>
                             <source src='" . asset('uploads/videos/' . $row->video_name) . "' type='video/mp4' />
 
@@ -237,8 +235,7 @@ class DashboardController extends Controller
                           </video>
                         ";
                         }
-                        
-                        
+
                         return $video;
                     }
 
@@ -282,12 +279,10 @@ class DashboardController extends Controller
                 })
                 ->addColumn('user', function ($row) {
                     if ($row->users->username == null) {
-                        $user = $row->users->first_name.' '.$row->users->last_name;
+                        $user = $row->users->first_name . ' ' . $row->users->last_name;
                     } else {
                         $user = '@' . $row->users->username;
                     }
-                    
-                    
 
                     return $user;
                 })
@@ -300,7 +295,7 @@ class DashboardController extends Controller
 
                     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
-                    <a class='btn btn-danger btn-icon' data-bs-toggle='modal' 
+                    <a class='btn btn-danger btn-icon' data-bs-toggle='modal'
                     onclick='viewdetails(event.target)' data-bs-target='#exampleModal' data-id='" . $row->id . "'>
                     View </a>";
 
@@ -313,18 +308,18 @@ class DashboardController extends Controller
     }
     public function videodetails($id)
     {
-        $video = Video::where('id',$id)->with('allcomments')->first();
-        $video_details= [
-            'investment_req'=>$video->investment_req,
-            'category'=>$video->video_category!=null?$video->video_category:'N/A' ,
-            'is_approved'=>$video->is_approved,
-            'is_flagged'=>$video->is_flagged,
-            'posted_at'=>$video->created_at->format('d/m/Y'),
-            'total_likes'=>$video->like_count,
-            'total_comments'=>$video->allcomments->count(),
-            'total_views'=>$video->view->count()
+        $video = Video::where('id', $id)->with('allcomments')->first();
+        $video_details = [
+            'investment_req' => $video->investment_req,
+            'category' => $video->video_category != null ? $video->video_category : 'N/A',
+            'is_approved' => $video->is_approved,
+            'is_flagged' => $video->is_flagged,
+            'posted_at' => $video->created_at->format('d/m/Y'),
+            'total_likes' => $video->like_count,
+            'total_comments' => $video->allcomments->count(),
+            'total_views' => $video->view->count(),
         ];
-        return response()->json(['video_details'=>$video_details], 200);
+        return response()->json(['video_details' => $video_details], 200);
     }
     public function videoedit($id)
     {
@@ -374,11 +369,11 @@ class DashboardController extends Controller
     public function hashtagsdata(Request $request)
     {
         if ($request->ajax()) {
-            $data = Hashtag::orderby('views','desc')->latest()->get();
+            $data = Hashtag::orderby('views', 'desc')->latest()->get();
             return DataTables::of($data)
-            ->addIndexColumn()
+                ->addIndexColumn()
                 ->addColumn('hashtag_title', function ($row) {
-                    $title = '#'.$row->name;
+                    $title = '#' . $row->name;
                     return $title;
                 })
                 ->addColumn('total_videos', function ($row) {
@@ -389,17 +384,88 @@ class DashboardController extends Controller
                     $total_views = $row->views;
                     return $total_views;
                 })
-                // ->addColumn('action', function ($row) {
+            // ->addColumn('action', function ($row) {
 
-                //     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
-                //     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
+            //     return $action = "<a class='btn btn-primary btn-icon' href='" . route('video.edit', ['id' => $row->id]) . "'>
+            //     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>";
 
-                // })
+            // })
 
                 ->rawColumns(['hashtag_title', 'total_videos', 'total_views'])
                 ->make(true);
 
         }
-        
+
+    }
+    public function category()
+    {
+        return view('Backend.pages.category-index');
+    }
+    public function categoryStore(Request $request)
+    {
+        $category = new Category;
+        $category->price_range = $request->get('category');
+        $category->save();
+
+        return redirect()->back()->with('success', 'Category Added');
+    }
+    public function categoryData(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Category::latest()->get();
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('name', function ($row) {
+                    $title = $row->price_range;
+                    return $title;
+                })
+                ->addColumn('total_videos', function ($row) {
+                    $totalvideo = $row->videos->count();
+                    return $totalvideo;
+                })
+                ->addColumn('action', function ($row) {
+
+                    return $action = "<a class='btn btn-primary btn-icon' href='" . route('category.edit', ['id' => $row->id]) . "'>
+                    Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
+                    <a class='btn btn-danger btn-icon' id='delete' onclick='deletecategory(this)' data-id='" . $row->id . "'>
+                    Delete <i class='ti-trash btn-icon-append icons-table'></i></a>
+                    ";
+
+                })
+
+                ->rawColumns(['name','total_videos', 'action'])
+                ->make(true);
+
+        }
+
+    }
+    public function categoryedit($id)
+    {
+        $category = Category::find($id);
+
+        return view('Backend.pages.edit-category',compact('category'));
+    }
+    public function categoryUpdate(Request $request)
+    {
+        $category = Category::find($request->get('category_id'));
+        $category->price_range = $request->get('category');
+        $category->update();
+
+        return redirect()->route('category.index')->with('success', 'Category updated');
+
+    }
+    public function categorydelete(Request $request)
+    {
+        Category::find($request->get('id'))->delete();
+        return response()->json(200);
+    }
+    public function categoryDuplicate(Request $request)
+    {
+        $categoryexist =Category::where('price_range', $request->get('category'))->first();
+        if ($categoryexist) {
+            return response()->json(array("exists" => true));
+        } else {
+            return response()->json(array("exists" => false));
+        }
     }
 }

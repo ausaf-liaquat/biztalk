@@ -2,11 +2,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryCollection;
 use App\Http\Resources\CommentCollection;
 use App\Http\Resources\HashtagCollection;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\VideoCollection;
 use App\Models\Banner;
+use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Hashtag;
 use App\Models\OtpPhone;
@@ -325,7 +327,7 @@ class ApiAuthController extends Controller
                         'is_approved' => $request->get('is_approved'),
                         'video_title' => $request->get('video_title'),
                         'video_description' => $request->get('video_description'),
-                        'video_category' => $request->get('video_category'),
+                        'category_id' => $request->get('category_id'),
                         'investment_req' => $request->get('investment_req'),
                         'allow_comment' => $request->get('allow_comment'),
                         'is_active' => $request->get('is_active'),
@@ -971,6 +973,7 @@ class ApiAuthController extends Controller
                 'gender' => $userdetails->gender,
                 'is_verified' => $userdetails->is_verified,
                 'total_like_received' => $like,
+                'is_following' => Auth::user()->isFollowing(User::find($user_id)),
                 'followers_count' => $userdetails->approvedFollowers()->count(),
                 'followings_count' => $userdetails->approvedFollowings()->count(),
                 'profile_image' => asset('uploads/avtars/' . $userdetails->profile_image),
@@ -992,18 +995,26 @@ class ApiAuthController extends Controller
         $names = explode(" ", $request->get('hashtag_name'));
         if (Helper::mac_check($token, $request->get('mac_id'))) {
 
-
-            $videos = Video::where(function ($query) use ($names) {
+            $hashtags_videos = Hashtag::where(function ($query) use ($names) {
                 foreach ($names as $k) {
-                    // $query->orWhere('video_title', 'like', '%' . $k . '%');
-                    // $query->orWhere('video_description', 'like', '%' . $k . '%');
-                    $query->orWhere('hashtags', 'like', "%" . $k . "%");
+                    $query->orWhere('name', 'like', "%" . $k . "%");
                 }
-            })->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+            })->get();
+            return $this->success(['hashtags' => new HashtagCollection($hashtags_videos)], 200);
 
-            // $hashtag = $request->get('hashtag_name');
-            // $videos = Video::where('hashtags','like', '%'.$hashtag.'%')->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
-            return $this->success(['hashtag_videos' => new VideoCollection($videos)], 'Hashtag Videos list', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+
+    }
+    public function category_list(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+            $categories_list = Category::orderby('price_range', 'asc')->latest()->get();
+            return $this->success(['category_list' => new CategoryCollection($categories_list)], 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);

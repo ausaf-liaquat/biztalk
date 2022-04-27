@@ -11,7 +11,7 @@
                         </p> --}}
                         <div class="table-responsive">
 
-                            <table class="table table-striped" id="video_table">
+                            <table class="table table-striped select-table" id="video_table">
                                 <thead>
                                     <tr>
                                         <th>
@@ -54,9 +54,9 @@
                 </div>
                 <div class="modal-body">
 
-                    <div class="table-responsive">
+                    <div class="table-responsive mt-1">
 
-                        <table class="table table-striped" id="video_table">
+                        <table class="table table-striped select-table" id="video_table">
 
                             <thead>
                                 <tr>
@@ -138,37 +138,11 @@
                         name: 'video',
 
                     },
-
-                    // {
-                    //     data: 'investment_req',
-                    //     name: 'investment_req',
-
-                    // },
-                    // {
-                    //     data: 'video_category',
-                    //     name: 'video_category',
-
-                    // },
-                    // {
-                    //     data: 'status',
-                    //     name: 'status',
-
-                    // },
-                    // {
-                    //     data: 'flagged_video',
-                    //     name: 'flagged_video',
-
-                    // },
                     {
                         data: 'user',
                         name: 'user',
 
                     },
-                    // {
-                    //     data: 'created_at',
-                    //     name: 'created_at',
-
-                    // },
                     {
                         data: 'action',
                         name: 'action',

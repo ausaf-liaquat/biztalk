@@ -31,28 +31,34 @@
             </a>
         </li>
         <li class="nav-item">
+            <a class="nav-link" href="{{ route('category.index') }}">
+                <i class="fa-solid fa-square-plus menu-icon"></i>
+                <span class="menu-title">Categories</span>
+            </a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="mdi mdi-information menu-icon"></i>
                 <span class="menu-title">Tickets System</span>
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="fa-solid fa-ban menu-icon"></i>
                 <span class="menu-title">Reported User</span>
             </a>
-        </li>
+        </li> --}}
         <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="mdi mdi-video-off menu-icon"></i>
                 <span class="menu-title">Flaged Media</span>
             </a>
         </li>
-        <li class="nav-item">
+        {{-- <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="mdi mdi-settings-box menu-icon"></i>
                 <span class="menu-title">Settings</span>
             </a>
-        </li>
+        </li> --}}
     </ul>
 </nav>

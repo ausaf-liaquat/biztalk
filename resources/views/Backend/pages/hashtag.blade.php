@@ -11,7 +11,7 @@
                         </p> --}}
                         <div class="table-responsive">
 
-                            <table class="table table-striped" id="hashtag_table">
+                            <table class="table table-striped select-table" id="hashtag_table">
                                 <thead>
                                     <tr>
                                         <th>

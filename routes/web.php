@@ -3,7 +3,7 @@
 use App\Http\Controllers\Backend\DashboardController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/cache', function() {
+Route::get('/cache', function () {
     $exitCode = Artisan::call('config:cache');
     return "ok";
 });
@@ -76,7 +76,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/video/status', [DashboardController::class, 'videostatus'])->name('video.status');
     Route::get('/video/details/{id}', [DashboardController::class, 'videodetails'])->name('video.details');
 
-
     Route::get('/banners/show', [DashboardController::class, 'banners'])->name('banners.index');
     Route::post('/banner/store', [DashboardController::class, 'bannerstore'])->name('banners.store');
 
@@ -85,7 +84,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/video/streaming/{path}', [DashboardController::class, 'videoStreaming'])->name('video.streaming');
 
-
+    Route::get('/category', [DashboardController::class, 'category'])->name('category.index');
+    Route::post('/category/store', [DashboardController::class, 'categoryStore'])->name('category.store');
+    Route::get('/category/data', [DashboardController::class, 'categoryData'])->name('category.data');
+    Route::get('/edit/{id}/category', [DashboardController::class, 'categoryedit'])->name('category.edit');
+    Route::post('/category/update', [DashboardController::class, 'categoryUpdate'])->name('category.update');
+    Route::get('/delete/category', [DashboardController::class, 'categorydelete'])->name('category.delete');
+    Route::post('/check/category', [DashboardController::class, 'categoryDuplicate'])->name('category.duplicate');
 
 });
 require __DIR__ . '/auth.php';
