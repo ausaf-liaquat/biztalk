@@ -906,7 +906,7 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-            $user = Auth::user();
+            $user = User::find($request->get('user_id'));
             $userList = $user->approvedFollowers()->get();
             return $this->success(['followers_list' => new UserCollection($userList)], 'Followers', 200);
 
@@ -920,7 +920,7 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
-            $user = Auth::user();
+            $user = User::find($request->get('user_id'));
             $userList = $user->approvedFollowings()->get();
 
             return $this->success(['followings_list' => new UserCollection($userList)], 'Followers', 200);

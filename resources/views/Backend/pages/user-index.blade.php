@@ -30,7 +30,7 @@
                                         </th>
 
                                         <th>
-                                            Status
+                                            Joined date
                                         </th>
 
                                         <th>
