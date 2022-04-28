@@ -10,6 +10,7 @@ use App\Models\Hashtag;
 use App\Models\User;
 use App\Models\Video;
 use DataTables;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,10 +21,11 @@ class DashboardController extends Controller
         $user_count = User::doesntHave('roles')->count();
         $video_count = Video::count();
         $like_count = \DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->count();
+        $hashtag_count = Hashtag::count();
         $comment_count = Comment::count();
         $recent_users = User::doesntHave('roles')->latest()->take(5)->get();
         // dd($recent_users);
-        return view('Backend.pages.index', compact('user_count', 'video_count', 'like_count', 'comment_count', 'recent_users'));
+        return view('Backend.pages.index', compact('user_count', 'video_count', 'like_count', 'comment_count', 'recent_users','hashtag_count'));
 
     }
     public function userindex()
@@ -94,10 +96,13 @@ class DashboardController extends Controller
 
                 ->addColumn('action', function ($row) {
 
-                    return $action = "<a class='btn btn-primary btn-icon ' href='" . route('user.edit', ['id' => $row->id]) . "'>
+                    return $action = "<a class='btn btn-warning btn-icon' data-bs-toggle='modal'
+                    onclick='viewdetails(event.target)' data-bs-target='#exampleModal' data-id='" . $row->id . "'>
+                    View </a> <a class='btn btn-primary btn-icon ' href='" . route('user.edit', ['id' => $row->id]) . "'>
                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>
                     <a class='btn btn-danger btn-icon' id='delete' onclick='deleteUser(this)' data-id='" . $row->id . "'>
                     Delete <i class='ti-trash btn-icon-append icons-table'></i></a>
+                    
                     ";
 
                 })
@@ -111,6 +116,27 @@ class DashboardController extends Controller
     {
         $user = User::find($id);
         return view('Backend.pages.edit-user', compact('user'));
+    }
+    public function userdetails($id)
+    {
+        $user = User::find($id);
+
+        $user_videos = array();
+        foreach ($user->videos as $video) {
+            $user_videos[] = $video->id;
+        }
+        $like = DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->whereIn('likeable_id', $user_videos)->count();
+
+        $user_details = [
+            'country' => $user->country != null ? $user->country : 'N/A',
+            'dob' => $user->dob != null ? $user->dob : 'N/A',
+            'gender' => $user->gender != null ? $user->gender : 'N/A',
+            'isaccount_public' => $user->isaccount_public == 1 ? 'Yes' : 'No',
+            'total_like_received' => $like,
+            'followers_count' => $user->approvedFollowers()->count(),
+            'followings_count' => $user->approvedFollowings()->count(),
+        ];
+        return response()->json(['user_details' => $user_details], 200);
     }
     public function userupdate(Request $request)
     {
@@ -433,7 +459,7 @@ class DashboardController extends Controller
 
                 })
 
-                ->rawColumns(['name','total_videos', 'action'])
+                ->rawColumns(['name', 'total_videos', 'action'])
                 ->make(true);
 
         }
@@ -443,7 +469,7 @@ class DashboardController extends Controller
     {
         $category = Category::find($id);
 
-        return view('Backend.pages.edit-category',compact('category'));
+        return view('Backend.pages.edit-category', compact('category'));
     }
     public function categoryUpdate(Request $request)
     {
@@ -461,7 +487,7 @@ class DashboardController extends Controller
     }
     public function categoryDuplicate(Request $request)
     {
-        $categoryexist =Category::where('price_range', $request->get('category'))->first();
+        $categoryexist = Category::where('price_range', $request->get('category'))->first();
         if ($categoryexist) {
             return response()->json(array("exists" => true));
         } else {

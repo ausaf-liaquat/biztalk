@@ -38,6 +38,29 @@
                                     <div class="statistics-details align-items-center justify-content-between">
                                         <div class="card">
                                             <div class="card-body">
+                                                <p class="statistics-title">Total Hashtags <i class="fa-solid fa-hashtag icons"></i></p>
+                                                <h3 class="rate-percentage">{{ $hashtag_count }}</h3> 
+                                                {{-- <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <h3 class="rate-percentage"> <span
+                                                                style="font-size: 10px;">Like</span> {{ $like_count }}
+                                                        </h3>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <h3 class="rate-percentage"> <span
+                                                                style="font-size: 10px;">Comments</span>
+                                                            {{ $comment_count }}</h3>
+                                                    </div>
+                                                   
+                                                </div> --}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- <div class="col-sm-4">
+                                    <div class="statistics-details align-items-center justify-content-between">
+                                        <div class="card">
+                                            <div class="card-body">
                                                 <p class="statistics-title">User Activities <i
                                                         class="fa-solid fa-align-justify icons"></i></p>
                                                 <div class="row">
@@ -51,17 +74,13 @@
                                                                 style="font-size: 10px;">Comments</span>
                                                             {{ $comment_count }}</h3>
                                                     </div>
-                                                    {{-- <div class="col-sm-4">
-                                                        <h3 class="rate-percentage"> <span style="font-size: 10px;">Tickets</span>  0</h3> 
-                                                     </div> --}}
+                                                   
                                                 </div>
-
-
 
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                             <div class="row">
                                 {{-- <div class="col-lg-8 d-flex flex-column">

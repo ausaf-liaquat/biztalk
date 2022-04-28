@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Video;
+use App\Notifications\ReplyNotification;
 use App\Notifications\VideoCommentNotification;
 use App\Traits\ApiResponser;
 use Auth;
@@ -31,13 +32,12 @@ class CommentController extends Controller
         $user = User::find($video->users->id);
         $video->comments()->save($comment);
         if (Auth::user()->id != $user->id) {
-            $user->notify(new VideoCommentNotification(Auth::user(), $comment,$video));
+            $user->notify(new VideoCommentNotification(Auth::user(), $comment, $video));
         }
 
         $total_comments = $video->allcomments->count();
         return $this->success([$total_comments], 'comment saved');
     }
-
     public function replyStore(Request $request)
     {
         $request->validate([
@@ -61,7 +61,12 @@ class CommentController extends Controller
 
                 $video->comments()->save($reply);
 
-                return $this->success([], 'reply saved');} else {
+                $userid = $comment->user->id;
+                if (Auth::user()->id != $userid) {
+                    $comment->user->notify(new ReplyNotification(Auth::user(), $reply, $video));
+                }
+                return $this->success([], 'reply saved');
+            } else {
                 return $this->error('no record found', 404);
             }
 

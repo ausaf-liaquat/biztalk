@@ -17,6 +17,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'username' => $this->username,
+            'isaccount_public' => $this->isaccount_public,
             'profile_image' => asset('uploads/avtars/' . $this->profile_image),
         ];
     }

@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/status', [DashboardController::class, 'userstatus'])->name('user.status');
     Route::post('/user/check/email', [DashboardController::class, 'useremail'])->name('user.checkemail');
     Route::get('/user/delete', [DashboardController::class, 'userdelete'])->name('user.delete');
+    Route::get('/user/details/{id}', [DashboardController::class, 'userdetails'])->name('user.details');
 
     Route::get('/videos', [DashboardController::class, 'videos'])->name('video.index');
     Route::get('/videos/data', [DashboardController::class, 'videosdata'])->name('video.data');

@@ -30,8 +30,12 @@
                                         </th>
 
                                         <th>
-                                            Joined date
+                                            Status
                                         </th>
+
+                                        {{-- <th>
+                                            Joined date
+                                        </th> --}}
 
                                         <th>
                                             Actions
@@ -50,9 +54,108 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">User details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="table-responsive mt-1">
+
+                        <table class="table table-striped select-table" id="video_table">
+
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Is Account Public
+                                    </th>
+                                    <th>
+                                        Country
+                                    </th>
+                                    <th>
+                                        Total Followers
+                                    </th>
+                                    <th>
+                                        Total Followings
+                                    </th>
+
+                                    <th>
+                                        Total Likes Received
+                                    </th>
+
+                                    <th>
+                                        DOB
+                                    </th>
+
+                                    <th>
+                                        Gender
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <div class="spinner" id="loader">
+                                {{-- <div class="bounce1"></div>
+                                <div class="bounce2"></div>
+                                <div class="bounce3"></div> --}}
+                                <img src="{{ asset('assets/images/loader.gif') }}" alt="" srcset="">
+                            </div>
+                            <tbody id="tbody">
+
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('extrajs')
+    <script>
+        function viewdetails(e) {
+            var id = $(e).data("id");
+            var $loading = $('#loader');
+            var url = '{{ route('user.details', ':id') }}';
+            url = url.replace(':id', id);
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                dataType: 'json',
+                // beforeSend: function() { // Before we send the request, remove the .hidden class from the spinner and default to inline-block.
+                //     $loading.show();
+                // },
+                success: function(data) {
+                    // On Success, build our rich list up and append it to the #richList div.
+                    $("#tbody").empty();
+
+
+                    $("#tbody").append("<tr><td>" + data.user_details.isaccount_public +
+                        "</td><td>" + data.user_details.country +
+                        "</td><td>" + data.user_details.followers_count + 
+                        "</td><td>" + data.user_details.followings_count +
+                        "</td><td>" + data.user_details.total_like_received +
+                        "</td><td>" + data.user_details.dob +
+                        "</td><td>" + data.user_details.gender +
+                        "</td></tr>");
+
+
+                    $('#exampleModal').modal('show');
+                },
+                complete: function() { // Set our complete callback, adding the .hidden class and hiding the spinner.
+                    $loading.hide();
+                },
+            });
+
+
+        }
+    </script>
     <script>
         $(document).ready(function() {
 
@@ -93,10 +196,15 @@
 
                     },
                     {
-                        data: 'joineddate',
-                        name: 'joineddate',
+                        data: 'status',
+                        name: 'status',
 
                     },
+                    // {
+                    //     data: 'joineddate',
+                    //     name: 'joineddate',
+
+                    // },
                     {
                         data: 'action',
                         name: 'action',

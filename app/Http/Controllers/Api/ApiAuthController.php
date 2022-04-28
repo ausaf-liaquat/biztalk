@@ -17,6 +17,7 @@ use App\Models\Video;
 use App\Models\VideoView;
 use App\Notifications\AcceptFollowNotification;
 use App\Notifications\FollowNotification;
+use App\Notifications\LikeCommentNotification;
 use App\Notifications\LikeNotification;
 // use FFMpeg\FFMpeg;
 use App\Traits\ApiResponser;
@@ -201,6 +202,7 @@ class ApiAuthController extends Controller
                 'dob' => Auth::user()->dob,
                 'gender' => Auth::user()->gender,
                 'is_verified' => Auth::user()->is_verified,
+                'isaccount_public' => Auth::user()->isaccount_public,
                 'total_like_received' => $like,
                 'followers_count' => Auth::user()->approvedFollowers()->count(),
                 'followings_count' => Auth::user()->approvedFollowings()->count(),
@@ -562,6 +564,11 @@ class ApiAuthController extends Controller
                     return $this->success([], 'Comment already liked', 200);
                 } else {
                     $comment->like(Auth::user()->id);
+
+                    if (Auth::user()->id != $comment->user->id) {
+                        $comment->user->notify(new LikeCommentNotification(Auth::user(), $comment));
+                    }
+
                     return $this->success([], 'comment liked', 200);
                 }
 
@@ -677,7 +684,7 @@ class ApiAuthController extends Controller
 
             //$hashtag = Hashtag::where('views','>=',2)->inRandomOrder()->get();
 
-            $hashtag = Hashtag::where('views', '>=', 2)->get()->sortByDesc('views');
+            $hashtag = Hashtag::where('views', '>', 2)->has('videos')->get()->sortByDesc('views');
             $banner = Banner::first();
 
             foreach (json_decode($banner->image_name) as $item) {
@@ -812,9 +819,9 @@ class ApiAuthController extends Controller
             $auth_user = Auth::user();
 
             if ($auth_user->isFollowing($userid)) {
-                return $this->error('you already follow this user', 500);
+                return $this->success([], 'you already follow this user', 500);
             } elseif ($auth_user->hasRequestedToFollow($userid)) {
-                return $this->error('your follow request is still in pending', 500);
+                return $this->success([], 'your follow request is still in pending', 500);
             } else {
                 $res = $auth_user->follow($userid);
                 $userid->notify(new FollowNotification($userid));
@@ -828,6 +835,26 @@ class ApiAuthController extends Controller
             return $this->fail("UnAuthorized", 500);
         }
 
+    }
+    public function unfollow(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $isfollowing = Auth::user()->isFollowing(User::find($request->get('user_id')));
+
+            if ($isfollowing) {
+
+                Auth::user()->unfollow(User::find($request->get('user_id')));
+
+                return $this->success([], 'Successfully unfollowed', 200);
+            } else {
+                return $this->error('Something went wrong', 500);
+            }
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
     }
     public function follow_requests(Request $request)
     {
@@ -972,6 +999,7 @@ class ApiAuthController extends Controller
                 'dob' => $userdetails->dob,
                 'gender' => $userdetails->gender,
                 'is_verified' => $userdetails->is_verified,
+                'isaccount_public' => $userdetails->isaccount_public,
                 'total_like_received' => $like,
                 'is_following' => Auth::user()->isFollowing(User::find($user_id)),
                 'followers_count' => $userdetails->approvedFollowers()->count(),
@@ -1019,6 +1047,70 @@ class ApiAuthController extends Controller
         } else {
             return $this->fail("UnAuthorized", 500);
         }
+
+    }
+    public function notificationsCount(Request $request)
+    {
+
+        try {
+
+            $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($request) {
+
+                while (true) {
+                    $notif_count = Auth::user()->unreadNotifications->count();
+
+                    echo json_encode(['data' => $notif_count]) . "\n\n";
+                    ob_flush();
+                    flush();
+                    usleep(200000);
+                }
+
+            });
+            $response->headers->set('Content-Type', 'text/event-stream');
+            $response->headers->set('X-Accel-Buffering', 'no');
+            $response->headers->set('Cach-Control', 'no-cache');
+            return $response->send();
+        } catch (\Exception$e) {
+            return response()->json(['error' => $e->getMessage()]);
+        }
+
+        // $unreadNotification_count = Auth::user()->unreadNotifications->count();
+
+        // return response()->json(['status' => 'Success', 'message' => 'Unread Notifications', 'data' => array(Auth::user()->unreadNotifications, $unreadNotification_count)], 200);
+
+    }
+    public function markAsReadOne($id)
+    {
+        $userUnreadNotification = auth()->user()->unreadNotifications->where('id', $id)->first();
+
+        if ($userUnreadNotification) {
+            $userUnreadNotification->markAsRead();
+        }
+        return $this->success([], 'Notification mark as read', 200);
+    }
+    public function markAsRead()
+    {
+
+        Auth::user()->notifications->markAsRead();
+
+        return $this->success([], 'All notifications mark as read', 200);
+
+    }
+    public function notificationsList()
+    {
+
+        $all_notifications = Auth::user()->notifications;
+        $notification_count = Auth::user()->notifications->count();
+
+        return $this->success(['notification_count' => $notification_count, 'all_notifications' => $all_notifications], 'All Notifications List', 200);
+
+    }
+    public function unreadNotificationsList()
+    {
+        $unread_notifications = Auth::user()->unreadNotifications;
+        $notif_count = Auth::user()->unreadNotifications->count();
+
+        return $this->success(['unread_notification_count' => $notif_count, 'unread_notifications' => $unread_notifications], 'Unread Notifications List', 200);
 
     }
 }

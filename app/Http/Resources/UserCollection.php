@@ -24,6 +24,7 @@ class UserCollection extends ResourceCollection
                     'followers_count'=>$data->approvedFollowers()->count(),
                     'followings_count'=>$data->approvedFollowings()->count(),
                     'is_following'=>Auth::user()->isFollowing(User::find($data->id)),
+                    'isaccount_public' => $data->isaccount_public,
                     'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
                 ];
             }),

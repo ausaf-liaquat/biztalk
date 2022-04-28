@@ -78,6 +78,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('/video/user/details', [ApiAuthController::class, 'video_userdetails']);
         Route::post('/hashtag/search', [ApiAuthController::class, 'hashtag_search']);
         Route::post('/category/list', [ApiAuthController::class, 'category_list']);
+
+        Route::post('/unfollow', [ApiAuthController::class, 'unfollow']);
+
+        //Notification
+        Route::get('unread/notifications/count', [ApiAuthController::class, 'notificationsCount']);
+        Route::get('mark/as-read/all-notifications', [ApiAuthController::class, 'markAsRead']);
+        Route::get('mark/as-read/{id}/notification', [ApiAuthController::class, 'markAsReadOne']);
+        Route::get('all/notifications/list', [ApiAuthController::class, 'notificationsList']);
+        Route::get('unread/notifications/list', [ApiAuthController::class, 'unreadNotificationsList']);
+
     });
 
 });
