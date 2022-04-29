@@ -88,6 +88,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::get('all/notifications/list', [ApiAuthController::class, 'notificationsList']);
         Route::get('unread/notifications/list', [ApiAuthController::class, 'unreadNotificationsList']);
 
+        Route::post('community/guidelines', [ApiAuthController::class, 'communityGuidelines']);
+
+        Route::post('user/edit', [ApiAuthController::class, 'update_personalDetail']);
+
+        Route::post('user/management', [ApiAuthController::class, 'update_management']);
+
+        Route::post('suggestion', [ApiAuthController::class, 'suggestion']);
+
     });
 
 });

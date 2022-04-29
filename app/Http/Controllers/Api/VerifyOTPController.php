@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Notifications\SendOtp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\ApiResponser;
 
 class VerifyOTPController extends Controller
 {
+    use ApiResponser;
+
     public function store(Request $request)
     {
         $request->validate([
@@ -28,9 +31,10 @@ class VerifyOTPController extends Controller
 
             $user->resetOTP();
 
-            return response()->json(['message' => 'Congrats!! Account verified'], 200);
+            return $this->success([], 'Congrats!! Account verified', 200);
         } else {
-            return response()->json(['status' => 403, 'message' => 'Invalid code!! please enter the correct one'], 403);
+            return $this->error('Invalid code!! please enter the correct one', 403);
+           
         }
 
     }
@@ -41,6 +45,6 @@ class VerifyOTPController extends Controller
         $user->generateOTP();
         $user->notify(new SendOtp());
 
-        return response()->json(['status' => 200, 'message' => 'The two factor code has been sent again'], 200);
+        return $this->success([], 'The two factor code has been sent again', 200);
     }
 }

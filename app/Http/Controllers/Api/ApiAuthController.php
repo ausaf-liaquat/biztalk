@@ -10,6 +10,7 @@ use App\Http\Resources\VideoCollection;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Comment;
+use App\Models\CommunityGuideline;
 use App\Models\Hashtag;
 use App\Models\OtpPhone;
 use App\Models\User;
@@ -20,6 +21,7 @@ use App\Notifications\FollowNotification;
 use App\Notifications\LikeCommentNotification;
 use App\Notifications\LikeNotification;
 // use FFMpeg\FFMpeg;
+use App\Rules\MatchOldPassword;
 use App\Traits\ApiResponser;
 use Helper;
 use Illuminate\Auth\Events\PasswordReset;
@@ -1114,5 +1116,100 @@ class ApiAuthController extends Controller
 
         return $this->success(['unread_notification_count' => $notif_count, 'unread_notifications' => $unread_notifications], 'Unread Notifications List', 200);
 
+    }
+    public function communityGuidelines(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $cg = CommunityGuideline::first();
+
+            return $this->success(['community_guidelines' => $cg], 'community guidelines', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function update_personalDetail(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'username' => 'nullable|regex:/(^([a-zA-Z]+)(\d+)?$)/u',
+                'bio' => 'string|max:255',
+            ]);
+            $user = User::findOrFail(Auth::user()->id);
+            $user->first_name = $request->first_name;
+            $user->last_name = $request->last_name;
+            $user->username = $request->username;
+            $user->bio = $request->bio;
+            $user->update();
+
+            $base64_image = $request->profile_image;
+            if (!empty($base64_image)) {
+                if (preg_match('/^data:image\/(\w+);base64,/', $base64_image)) {
+
+                    // $folderpath = "uploads/avtars/";
+
+                    $data = substr($base64_image, strpos($base64_image, ',') + 1);
+
+                    $imageName = $request->user()->id . '_' . strtolower($request->user()->username) . '_' . date('d-m-Y-H-i') . '.' . 'jpg';
+                    $data = substr($base64_image, strpos($base64_image, ',') + 1);
+                    $data = base64_decode($data);
+                    Storage::disk('public')->put('avtars/' . $imageName, $data);
+
+                    $id = Auth()->user()->id;
+                    $User = User::find($id);
+                    $User->profile_image = $imageName;
+                    $User->save();
+
+                }
+            }
+
+            return $this->success([], 'Profile updated', 200);
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
+    }
+    public function update_management(Request $request)
+    {
+
+        $user = User::find(auth()->user()->id);
+        if (!empty($request->current_password)) {
+            $request->validate([
+                'current_password' => ['required', new MatchOldPassword],
+                'password' => 'required|string|confirmed|min:8|different:current_password|regex:/^(?=.*[a-zA-Z])(?=.*\d).+$/',
+            ]);
+            $user->password = Hash::make($request->password);
+        }
+        if (!empty($request->get('email'))) {
+            $request->validate([
+                'email' => 'nullable|string|email|max:255|unique:users',
+            ]);
+            $user->email = $request->get('email');
+        }
+        if (!empty($request->get('phone_no'))) {
+            $request->validate([
+                'phone_no' => 'nullable|unique:users|regex:/^\+[1-9]\d{1,14}$/|max:15',
+            ]);
+
+            $user->phone_no = $request->get('phone_no');
+        }
+        $user->update();
+
+        return $this->success([], 'User management updated', 200);
+    }
+    public function suggestion(Request $request)
+    {
+        $token = $request->bearerToken();
+
+        if (Helper::mac_check($token, $request->get('mac_id'))) {
+
+
+        } else {
+            return $this->fail("UnAuthorized", 500);
+        }
     }
 }

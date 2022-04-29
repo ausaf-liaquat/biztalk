@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('community_guidelines', function (Blueprint $table) {
             $table->id();
-            $table->string('tos',1500)->nullable();
-            $table->string('privacy',1500)->nullable();
+            $table->text('tos')->nullable();
+            $table->text('privacy')->nullable();
             $table->timestamps();
         });
     }
