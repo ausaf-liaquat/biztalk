@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\Hashtag;
 use App\Models\User;
 use App\Models\Video;
+use App\Models\CommunityGuideline;
 use DataTables;
 use DB;
 use Illuminate\Http\Request;
@@ -135,6 +136,7 @@ class DashboardController extends Controller
             'total_like_received' => $like,
             'followers_count' => $user->approvedFollowers()->count(),
             'followings_count' => $user->approvedFollowings()->count(),
+            'phone'=>$user->phone_no  != null ? $user->phone_no : 'N/A'
         ];
         return response()->json(['user_details' => $user_details], 200);
     }
@@ -493,5 +495,15 @@ class DashboardController extends Controller
         } else {
             return response()->json(array("exists" => false));
         }
+    }
+    public function community_guidelines()
+    {
+       $community =  CommunityGuideline::where('id',1)->get();
+    
+        return view('Backend.pages.community-guidelines', compact('community'));
+    }
+    public function Editcommunity_guidelines(Request $request)
+    {
+        return view();
     }
 }

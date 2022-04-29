@@ -39,7 +39,8 @@ class User extends Authenticatable
         'is_verified',
         'fb_id',
         'dob',
-        'gender'
+        'gender',
+        'bio'
     ];
 
     /**

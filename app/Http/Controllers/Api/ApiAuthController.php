@@ -200,6 +200,7 @@ class ApiAuthController extends Controller
                 'location' => Auth::user()->location,
                 'country' => Auth::user()->country,
                 'dob' => Auth::user()->dob,
+                'bio' => Auth::user()->bio,
                 'gender' => Auth::user()->gender,
                 'is_verified' => Auth::user()->is_verified,
                 'isaccount_public' => Auth::user()->isaccount_public,
@@ -997,6 +998,7 @@ class ApiAuthController extends Controller
                 'location' => $userdetails->location,
                 'country' => $userdetails->country,
                 'dob' => $userdetails->dob,
+                'bio' => $userdetails->bio,
                 'gender' => $userdetails->gender,
                 'is_verified' => $userdetails->is_verified,
                 'isaccount_public' => $userdetails->isaccount_public,
@@ -1060,7 +1062,7 @@ class ApiAuthController extends Controller
                     $notif_count = Auth::user()->unreadNotifications->count();
 
                     echo json_encode(['data' => $notif_count]) . "\n\n";
-                    ob_flush();
+                    if (ob_get_level() > 0) {ob_flush();}
                     flush();
                     usleep(200000);
                 }

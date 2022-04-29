@@ -42,12 +42,12 @@
                 <span class="menu-title">Tickets System</span>
             </a>
         </li>
-        {{-- <li class="nav-item">
-            <a class="nav-link" href="#">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('community.index') }}">
                 <i class="fa-solid fa-ban menu-icon"></i>
-                <span class="menu-title">Reported User</span>
+                <span class="menu-title">Community Guidelines</span>
             </a>
-        </li> --}}
+        </li>
         <li class="nav-item">
             <a class="nav-link" href="#">
                 <i class="mdi mdi-video-off menu-icon"></i>

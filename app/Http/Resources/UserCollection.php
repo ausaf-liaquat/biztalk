@@ -20,6 +20,7 @@ class UserCollection extends ResourceCollection
                 return [
                     'user_id'=>$data->id,
                     'username' => $data->username,
+                    'bio' => Auth::user()->bio,
                     'full_name'=> $data->first_name.' '.$data->last_name,
                     'followers_count'=>$data->approvedFollowers()->count(),
                     'followings_count'=>$data->approvedFollowings()->count(),

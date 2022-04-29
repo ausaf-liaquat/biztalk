@@ -93,5 +93,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delete/category', [DashboardController::class, 'categorydelete'])->name('category.delete');
     Route::post('/check/category', [DashboardController::class, 'categoryDuplicate'])->name('category.duplicate');
 
+    Route::get('/community/guidelines', [DashboardController::class, 'community_guidelines'])->name('community.index');
+    Route::get('/edit/{id}/community/guidelines', [DashboardController::class, 'Editcommunity_guidelines'])->name('editcommunity.index');
+
 });
 require __DIR__ . '/auth.php';

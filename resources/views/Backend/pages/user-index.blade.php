@@ -22,9 +22,7 @@
                                         <th>
                                             Username
                                         </th>
-                                        <th>
-                                            Phone no
-                                        </th>
+
                                         <th>
                                             Email
                                         </th>
@@ -70,6 +68,9 @@
 
                             <thead>
                                 <tr>
+                                    <th>
+                                        Phone no
+                                    </th>
                                     <th>
                                         Is Account Public
                                     </th>
@@ -136,9 +137,10 @@
                     $("#tbody").empty();
 
 
-                    $("#tbody").append("<tr><td>" + data.user_details.isaccount_public +
+                    $("#tbody").append("<tr><td>" + data.user_details.phone +
+                        "</td><td>" + data.user_details.isaccount_public +
                         "</td><td>" + data.user_details.country +
-                        "</td><td>" + data.user_details.followers_count + 
+                        "</td><td>" + data.user_details.followers_count +
                         "</td><td>" + data.user_details.followings_count +
                         "</td><td>" + data.user_details.total_like_received +
                         "</td><td>" + data.user_details.dob +
@@ -183,11 +185,6 @@
                     {
                         data: 'username',
                         name: 'username',
-
-                    },
-                    {
-                        data: 'phone',
-                        name: 'phone',
 
                     },
                     {
