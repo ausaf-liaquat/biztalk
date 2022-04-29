@@ -1206,8 +1206,19 @@ class ApiAuthController extends Controller
         $token = $request->bearerToken();
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
+            $userList = Auth::user()->approvedFollowers()->get();
+            $followers_id = array();
+            foreach ($userList as $key => $item) {
+                $followers_id[] = $item->id;
+            }
+            $userfollowingsList = Auth::user()->approvedFollowings()->get();
+            $followings_id = array();
+            foreach ($userfollowingsList as $key => $list) {
+                $followings_id[] = $list->id;
+            }
+            $suggestions = User::doesntHave('roles')->whereNotIn('id',$followers_id)->whereNotIn('id',$followings_id)->whereNot('id',Auth::user()->id)->get();
 
-
+            return $this->success([$suggestions], "suggestion", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
