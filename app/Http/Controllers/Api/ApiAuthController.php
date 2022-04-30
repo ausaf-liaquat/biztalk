@@ -11,6 +11,7 @@ use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\CommunityGuideline;
+use App\Models\Contact;
 use App\Models\Hashtag;
 use App\Models\OtpPhone;
 use App\Models\User;
@@ -39,6 +40,16 @@ class ApiAuthController extends Controller
 {
     use ApiResponser;
 
+    public function loginWithoutAccount(Request $request)
+    {
+        $without_hash_token = '2ncXyDP9aWyluql7Y9OHJ8eaCAaWTe9QGOs96hRU';
+        $pat = DB::table('personal_access_tokens')->where('token', hash('sha256', $without_hash_token))->update(['mac_id' => $request->get('mac_id')]);
+
+        return $this->success([
+            'token' => Helper::token(),
+        ], 'Login without account', 200);
+
+    }
     public function register(Request $request)
     {
         // DB::transaction(function () use (&$accessToken, $request) {
@@ -184,7 +195,7 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::mac_check($token, $request->get('mac_id')) && !Helper::token_check($token)) {
 
             $user_videos = array();
             foreach (Auth::user()->videos as $video) {
@@ -232,9 +243,9 @@ class ApiAuthController extends Controller
             'username' => 'required|string|max:255',
         ]);
         $user_name = $request->get('username');
-        User::where('username', $user_name);
+        User::whereNot('id',0)->where('username', $user_name);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
-        if (User::where('username', $user_name)->count() > 0) {
+        if (User::whereNot('id',0)->where('username', $user_name)->count() > 0) {
             return $this->error("This Username already exists.", 422, [$user_name]);
         } else {
             return $this->success([$user_name], "valid username", 200);
@@ -250,7 +261,7 @@ class ApiAuthController extends Controller
         $email = $request->get('email');
         User::where('email', $email);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
-        if (User::where('email', $email)->count() > 0) {
+        if (User::whereNot('id',0)->where('email', $email)->count() > 0) {
             return $this->error("This Email already exists.", 422);
         } else {
             return $this->success([], "valid email", 200);
@@ -266,7 +277,7 @@ class ApiAuthController extends Controller
         $phone = $request->get('phone');
         User::where('phone_no', $phone);
         // return \Response::json(array("status" => 200, "message" => "", "data" => array([$isExists])));
-        if (User::where('phone_no', $phone)->count() > 0) {
+        if (User::whereNot('id',0)->where('phone_no', $phone)->count() > 0) {
             return $this->error("This Phone no already exists.", 422);
         } else {
             return $this->success([], "valid phone no", 200);
@@ -277,7 +288,7 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::mac_check($token, $request->get('mac_id')) && !Helper::token_check($token)) {
             try {
 
                 $base64_image = $request->profile_image;
@@ -311,7 +322,7 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::mac_check($token, $request->get('mac_id')) && !Helper::token_check($token)) {
             $profile_image = asset('uploads/avtars/' . Auth::user()->profile_image);
             return $this->success([$profile_image], "Profile Image", 200);
         } else {
@@ -322,7 +333,7 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::mac_check($token, $request->get('mac_id')) && !Helper::token_check($token)) {
             try {
                 if ($request->hasFile('file')) {
                     $video = Video::create([
@@ -350,18 +361,18 @@ class ApiAuthController extends Controller
                     $video->video_name = $filename;
                     $video->save();
 
-                    $thumbnail_name = 'video_thumbnail_' . $video->id . '_' . rand(000000, 999999) . '.png';
+                    // $thumbnail_name = 'video_thumbnail_' . $video->id . '_' . rand(000000, 999999) . '.png';
 
-                    (new MediaOpener)
-                        ->open($file)
-                        ->getFrameFromSeconds(2)
-                        ->export()
-                        ->accurate()
-                        ->toDisk('public')
-                        ->save('thumbnail/' . $thumbnail_name);
+                    // (new MediaOpener)
+                    //     ->open($file)
+                    //     ->getFrameFromSeconds(2)
+                    //     ->export()
+                    //     ->accurate()
+                    //     ->toDisk('public')
+                    //     ->save('thumbnail/' . $thumbnail_name);
 
-                    $video->video_poster = $thumbnail_name;
-                    $video->save();
+                    // $video->video_poster = $thumbnail_name;
+                    // $video->save();
 
                     $checkhashtag = Hashtag::pluck('name')->toArray();
 
@@ -403,7 +414,7 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::mac_check($token, $request->get('mac_id')) && !Helper::token_check($token)) {
             $videos = Video::where('user_id', Auth::user()->id)->get();
             $v_url = array();
             foreach ($videos as $i) {
@@ -419,15 +430,18 @@ class ApiAuthController extends Controller
     {
         $token = $request->bearerToken();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
+        if (Helper::token(Helper::token_check($token) || !Helper::token_check($token))) {
+            if (Helper::mac_check($token, $request->get('mac_id'))) {
 
-            $videos = Video::where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+                $videos = Video::where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
 
-            return $this->success(new VideoCollection($videos), 'Videos list', 200);
-            // return new  VideoCollection(Video::all());
-        } else {
-            return $this->fail("UnAuthorized", 500);
+                return $this->success(new VideoCollection($videos), 'Videos list', 200);
+                // return new  VideoCollection(Video::all());
+            } else {
+                return $this->fail("UnAuthorized", 500);
+            }
         }
+
     }
     public function video_comment(Request $request)
     {
@@ -773,43 +787,43 @@ class ApiAuthController extends Controller
     public function search(Request $request)
     {
         $token = $request->bearerToken();
+        if (Helper::token(Helper::token_check($token) || !Helper::token_check($token))) {
+            if (Helper::mac_check($token, $request->get('mac_id'))) {
+                //   $user =  User::where('username','like','%'.$withoutspace.'%')->get();
 
-        if (Helper::mac_check($token, $request->get('mac_id'))) {
-            //   $user =  User::where('username','like','%'.$withoutspace.'%')->get();
+                $search = $request->get('search');
+                $names = explode(" ", $request->get('search'));
 
-            $search = $request->get('search');
-            $names = explode(" ", $request->get('search'));
+                if ($search == trim($search) && str_contains($search, ' ')) {
+                    $user = User::whereNot('id',0)->where(function ($query) use ($names) {
+                        // $query->whereIn('first_name',  $names );
+                        // $query->orWhere(function ($query) use ($names) {
+                        //     $query->whereIn('last_name',  $names );
+                        // });
+                        for ($i = 0; $i < count($names); $i++) {
+                            $query->orwhere('first_name', 'like', '%' . $names[$i] . '%');
+                            $query->orwhere('last_name', 'like', '%' . $names[$i] . '%');
+                        }
+                    })->get();
+                } else {
+                    $user = User::whereNot('id',0)->where(function ($query) use ($search) {
+                        $query->where('username', 'like', '%' . $search . '%');
 
-            if ($search == trim($search) && str_contains($search, ' ')) {
-                $user = User::where(function ($query) use ($names) {
-                    // $query->whereIn('first_name',  $names );
-                    // $query->orWhere(function ($query) use ($names) {
-                    //     $query->whereIn('last_name',  $names );
-                    // });
-                    for ($i = 0; $i < count($names); $i++) {
-                        $query->orwhere('first_name', 'like', '%' . $names[$i] . '%');
-                        $query->orwhere('last_name', 'like', '%' . $names[$i] . '%');
-                    }
-                })->get();
-            } else {
-                $user = User::where(function ($query) use ($search) {
-                    $query->where('username', 'like', '%' . $search . '%');
-
-                })->get();
-            }
-            $video = Video::where(function ($query) use ($names) {
-                foreach ($names as $k) {
-                    $query->orWhere('video_title', 'like', '%' . $k . '%');
-                    $query->orWhere('video_description', 'like', '%' . $k . '%');
-                    $query->orWhere('hashtags', 'like', "%" . $k . "%");
+                    })->get();
                 }
-            })->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
-            $hashtag = Hashtag::where('name', 'like', '%' . $search . '%')->get();
-            return $this->success(['users' => new UserCollection($user), 'videos' => new VideoCollection($video), 'hashtags' => new HashtagCollection($hashtag)], 'video liked', 200);
-        } else {
-            return $this->fail("UnAuthorized", 500);
+                $video = Video::where(function ($query) use ($names) {
+                    foreach ($names as $k) {
+                        $query->orWhere('video_title', 'like', '%' . $k . '%');
+                        $query->orWhere('video_description', 'like', '%' . $k . '%');
+                        $query->orWhere('hashtags', 'like', "%" . $k . "%");
+                    }
+                })->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
+                $hashtag = Hashtag::where('name', 'like', '%' . $search . '%')->get();
+                return $this->success(['users' => new UserCollection($user), 'videos' => new VideoCollection($video), 'hashtags' => new HashtagCollection($hashtag)], 'video liked', 200);
+            } else {
+                return $this->fail("UnAuthorized", 500);
+            }
         }
-
     }
     public function follow(Request $request)
     {
@@ -1216,11 +1230,45 @@ class ApiAuthController extends Controller
             foreach ($userfollowingsList as $key => $list) {
                 $followings_id[] = $list->id;
             }
-            $suggestions = User::doesntHave('roles')->whereNotIn('id',$followers_id)->whereNotIn('id',$followings_id)->whereNot('id',Auth::user()->id)->get();
 
-            return $this->success([$suggestions], "suggestion", 200);
+            $notApprovedFollower = Auth::user()->notApprovedFollowers()->get();
+            $notApprovedFollower_id = array();
+            foreach ($notApprovedFollower as $key => $list) {
+                $notApprovedFollower_id[] = $list->id;
+            }
+
+            $notApprovedFollowing = Auth::user()->notApprovedFollowings()->get();
+            $notApprovedFollowing_id = array();
+            foreach ($notApprovedFollowing as $key => $list) {
+                $notApprovedFollowing_id[] = $list->id;
+            }
+            $suggestions = User::whereNot('id',0)->doesntHave('roles')
+                ->whereNotIn('id', $followers_id)
+                ->whereNotIn('id', $followings_id)
+                ->whereNotIn('id', $notApprovedFollower_id)
+                ->whereNotIn('id', $notApprovedFollowing_id)
+                ->whereNot('id', Auth::user()->id)
+                ->where('isaccount_public', 1)
+                ->where('is_verified', 'active')->get();
+
+            return $this->success([new UserCollection($suggestions)], "account suggestions", 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
+    }
+    public function generateContact(Request $request)
+    {
+        $request->validate([
+            'title' => ['required'],
+            'message' => ['required'],
+        ]);
+        $contact = Contact::create([
+            'title' => $request->title,
+            'message' => $request->message,
+            'user_id' => Auth::user()->id,
+            'status' => 'open',
+        ]);
+        return $this->success([], "Message submitted Successfully", 200);
+
     }
 }

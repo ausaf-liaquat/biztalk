@@ -159,6 +159,7 @@
 
     {{-- <link rel="stylesheet" href="https://cdn.plyr.io/3.7.2/plyr.css" />
 <script src="https://cdn.plyr.io/3.7.2/plyr.js"></script> --}}
+@yield('css')
 </head>
 
 <body class="sidebar-dark">

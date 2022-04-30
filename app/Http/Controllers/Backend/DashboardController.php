@@ -19,12 +19,12 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user_count = User::doesntHave('roles')->count();
+        $user_count = User::whereNot('id',0)->doesntHave('roles')->count();
         $video_count = Video::count();
         $like_count = \DB::table('likeable_likes')->where('likeable_type', 'App\Models\Video')->count();
         $hashtag_count = Hashtag::count();
         $comment_count = Comment::count();
-        $recent_users = User::doesntHave('roles')->latest()->take(5)->get();
+        $recent_users = User::whereNot('id',0)->doesntHave('roles')->latest()->take(5)->get();
         // dd($recent_users);
         return view('Backend.pages.index', compact('user_count', 'video_count', 'like_count', 'comment_count', 'recent_users','hashtag_count'));
 
@@ -37,7 +37,7 @@ class DashboardController extends Controller
     {
         if ($request->ajax()) {
 
-            $data = User::doesntHave('roles')->latest()->get();
+            $data = User::whereNot('id',0)->doesntHave('roles')->latest()->get();
             return DataTables::of($data)
             // ->addIndexColumn()
 
@@ -158,7 +158,7 @@ class DashboardController extends Controller
     {
         if ($request->input('email')) {
             $email = $request->input('email');
-            $isExists = User::where('email', $email)->first();
+            $isExists = User::whereNot('id',0)->where('email', $email)->first();
 
             if ($isExists) {
                 return response()->json(array("exists" => true));
@@ -168,7 +168,7 @@ class DashboardController extends Controller
 
         } elseif ($request->input('phone')) {
             $phone = $request->input('phone');
-            $isExists = User::where('phone_no', $phone)->first();
+            $isExists = User::whereNot('id',0)->where('phone_no', $phone)->first();
 
             if ($isExists) {
                 return response()->json(array("exists" => true));
@@ -177,7 +177,7 @@ class DashboardController extends Controller
             }
         } elseif ($request->input('username')) {
             $username = $request->input('username');
-            $isExists = User::where('username', $username)->first();
+            $isExists = User::whereNot('id',0)->where('username', $username)->first();
 
             if ($isExists) {
                 return response()->json(array("exists" => true));
@@ -279,7 +279,7 @@ class DashboardController extends Controller
                 })
                 ->addColumn('video_category', function ($row) {
                     if ($row->video_category != null) {
-                        $video_category = $row->video_category;
+                        $video_category = $row->category != null ? $row->category->price_range : 'N/A';
 
                     } else {
                         $video_category = "N/A";
@@ -338,10 +338,10 @@ class DashboardController extends Controller
     {
         $video = Video::where('id', $id)->with('allcomments')->first();
         $video_details = [
-            'investment_req' => $video->investment_req,
-            'category' => $video->video_category != null ? $video->video_category : 'N/A',
-            'is_approved' => $video->is_approved,
-            'is_flagged' => $video->is_flagged,
+            'investment_req' => $video->investment_req == 1 ? 'Yes' : 'No',
+            'category' => $video->category != null ? $video->category->price_range : 'N/A',
+            'is_approved' => $video->is_approved == 1 ? 'Yes' : 'No',
+            'is_flagged' => $video->is_flagged == 1 ? 'Yes' : 'No',
             'posted_at' => $video->created_at->format('d/m/Y'),
             'total_likes' => $video->like_count,
             'total_comments' => $video->allcomments->count(),
@@ -502,8 +502,16 @@ class DashboardController extends Controller
     
         return view('Backend.pages.community-guidelines', compact('community'));
     }
-    public function Editcommunity_guidelines(Request $request)
+    public function Editcommunity_guidelines(Request $request,$id)
     {
-        return view();
+        $cg = CommunityGuideline::find($id);
+        return view('Backend.pages.edit-community', compact('cg'));
+    }
+    public function Updatecommunity_guidelines(Request $request)
+    {
+        $cg = CommunityGuideline::find($request->get('cg_id'));
+        $cg->tos = $request->get('tos');
+        $cg->update();
+        return redirect()->route('community.index')->with('success', 'Community Guidelines updated');
     }
 }

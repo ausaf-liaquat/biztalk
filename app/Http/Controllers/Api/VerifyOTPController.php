@@ -41,10 +41,12 @@ class VerifyOTPController extends Controller
     //  Resend Two Factor code
     public function resend()
     {
+        
         $user = auth()->user();
         $user->generateOTP();
-        $user->notify(new SendOtp());
+        $user->sendEmailVerificationNotification();
+        // $user->notify(new SendOtp());
 
-        return $this->success([], 'The two factor code has been sent again', 200);
+        return $this->success([], 'The verification code and link has been sent again', 200);
     }
 }

@@ -6,7 +6,7 @@
             </button>
         </div>
         <div>
-            <a class="navbar-brand brand-logo" href="index.html">
+            <a class="navbar-brand brand-logo" href="{{ route('dashboard') }}">
                 <img src="{{ asset('assets/images/BizTalk-Logo.jpeg') }}" alt="logo" style="height: 80px;" />
             </a>
             <a class="navbar-brand brand-logo-mini" href="index.html">

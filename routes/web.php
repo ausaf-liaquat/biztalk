@@ -95,6 +95,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/community/guidelines', [DashboardController::class, 'community_guidelines'])->name('community.index');
     Route::get('/edit/{id}/community/guidelines', [DashboardController::class, 'Editcommunity_guidelines'])->name('editcommunity.index');
+    Route::post('/update/community/guidelines', [DashboardController::class, 'Updatecommunity_guidelines'])->name('community.update');
+
+    Route::get('/contact', [DashboardController::class, 'contact'])->name('contact.index');
 
 });
 require __DIR__ . '/auth.php';

@@ -41,7 +41,7 @@ class VideoCollection extends ResourceCollection
                     'isVideoLiked'=>$data->liked(Auth::user()->id),
                     'isVideoPublic'=>$data->is_active,
                     'created_at'=>$data->created_at,
-                    'video_category'=>$data->video_category,
+                    'video_category'=>$data->category != null ? $data->category->price_range : null,
                     'urls' => asset('uploads/videos/' . $data->video_name),
                     'thumbnail'=> asset('uploads/thumbnail/' . $data->video_poster),
                     'views_count'=>$data->view->count(),

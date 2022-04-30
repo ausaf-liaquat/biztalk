@@ -4,6 +4,21 @@ use Illuminate\Support\Facades\DB;
 
 class Helper
 {
+    public static function token()
+    {
+        return "2ncXyDP9aWyluql7Y9OHJ8eaCAaWTe9QGOs96hRU";
+    }
+    public static function token_check($token)
+    {
+        $pat = DB::table('personal_access_tokens')->where('token', hash('sha256',$token))->first();
+       if ($pat->tokenable_id == 0) {
+           return true;
+       } else {
+           return false;
+       }
+        
+    }
+
     public static function ApiSuccessStatus()
     {
         $apistatus = "success";

@@ -1,4 +1,5 @@
 @extends('Backend.layouts.app')
+
 @section('content')
     <div class="content-wrapper">
         <div class="row">
@@ -30,9 +31,9 @@
                                         <th>
                                             tos
                                         </th>
-                                        <th>
+                                        {{-- <th>
                                             privacy
-                                        </th>
+                                        </th> --}}
                                         <th>
                                             Actions
                                         </th>
@@ -44,8 +45,8 @@
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
                                             <td style="white-space: pre-wrap;text-align:justify;"> {{ $item->tos }}</td>
-                                            <td style="white-space: pre-wrap;text-align:justify;">{{ $item->privacy }}
-                                            </td>
+                                            {{-- <td style="white-space: pre-wrap;text-align:justify;">{{ $item->privacy }}
+                                            </td> --}}
                                             <td>
                                                 <a class='btn btn-primary btn-icon' href='{{ route('editcommunity.index',['id'=>$item->id]) }}'>
                                                     Edit <i class='ti-pencil-alt btn-icon-append icons-table'></i></a>

@@ -16,6 +16,7 @@ class CategoryCollection extends ResourceCollection
     {
         return $this->collection->map(function ($data) {
             return [
+                'category_id'=>$data->id,
                 'range' => $data->price_range,
 
                 // 'videos' => new VideoCollection($data->videos),

@@ -23,6 +23,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
     Route::post('/auth/login', [ApiAuthController::class, 'login']);
     Route::post('/auth/logout', [ApiAuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::post('/verify/otp', [App\Http\Controllers\Api\VerifyOTPController::class, 'store'])->middleware('auth:sanctum');
+    Route::get('/code/resend', [App\Http\Controllers\Api\VerifyOTPController::class, 'resend'])->middleware('auth:sanctum');
 
     Route::post('/auth/forget-password', [ApiAuthController::class, 'forget_password']);
     Route::get('/reset-password/{token}', [ApiAuthController::class, 'newPassword'])->name('password.reset');
@@ -43,6 +44,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('/user', [ApiAuthController::class, 'userinfo']);
         Route::post('/videos/list', [ApiAuthController::class, 'videos_list']);
     });
+    Route::post('/login/without/account', [ApiAuthController::class, 'loginWithoutAccount']);
     Route::group(['middleware' => ['auth:sanctum', 'apiverified']], function () {
 
         Route::post('update/profile-image', [ApiAuthController::class, 'update_profileImage']);
@@ -95,6 +97,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         Route::post('user/management', [ApiAuthController::class, 'update_management']);
 
         Route::post('suggestion', [ApiAuthController::class, 'suggestion']);
+
+        //Contact
+        Route::post('generate/contact', [ApiAuthController::class, 'generateContact']);
+
+        
 
     });
 
