@@ -951,8 +951,13 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $user = User::find($request->get('user_id'));
-            $userList = $user->approvedFollowers()->get();
+            if($user != null){
+                $userList = $user->approvedFollowers()->get();
             return $this->success(['followers_list' => new UserCollection($userList)], 'Followers', 200);
+            }else{
+                return $this->error("no user found", 404);
+            }
+            
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -965,9 +970,14 @@ class ApiAuthController extends Controller
 
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $user = User::find($request->get('user_id'));
+            if($user != null){
             $userList = $user->approvedFollowings()->get();
 
             return $this->success(['followings_list' => new UserCollection($userList)], 'Followers', 200);
+            
+            }else{
+                return $this->error("no user found", 404);
+            }
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -981,11 +991,12 @@ class ApiAuthController extends Controller
         if (Helper::mac_check($token, $request->get('mac_id'))) {
             $user = Auth::user();
             $userList = $user->approvedFollowings()->get();
+            $user_id = array();
             foreach ($userList as $item) {
                 $user_id[] = $item->id;
             }
             $videos = Video::whereIn('user_id', $user_id)->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1)->with('comments')->latest()->get();
-            return $this->success([new VideoCollection($videos), $user_id], 'Followings videos', 200);
+            return $this->success(new VideoCollection($videos), 'Followings videos', 200);
         } else {
             return $this->fail("UnAuthorized", 500);
         }
@@ -999,7 +1010,7 @@ class ApiAuthController extends Controller
             $user_id = $request->get('user_id');
 
             $userdetails = User::find($user_id);
-
+            $user_videos = array();
             foreach ($userdetails->videos as $video) {
                 $user_videos[] = $video->id;
             }
@@ -1024,11 +1035,11 @@ class ApiAuthController extends Controller
                 'followings_count' => $userdetails->approvedFollowings()->count(),
                 'profile_image' => asset('uploads/avtars/' . $userdetails->profile_image),
             ];
-            $user_videos = $userdetails->videos->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1);
+            $user_videos_list = $userdetails->videos->where('is_approved', 1)->where('is_flagged', 0)->where('is_active', 1);
 
             $userliked_videos = Video::whereLikedBy($userdetails->id)->with('likeCounter')->orderBy('created_at', 'DESC')->get();
 
-            return $this->success(['user_details' => $user, 'user_videos' => new VideoCollection($user_videos), 'user_liked_videos' => new VideoCollection($userliked_videos)], 'user detail', 200);
+            return $this->success(['user_details' => $user, 'user_videos' => new VideoCollection($user_videos_list), 'user_liked_videos' => new VideoCollection($userliked_videos)], 'user detail', 200);
 
         } else {
             return $this->fail("UnAuthorized", 500);
@@ -1151,13 +1162,15 @@ class ApiAuthController extends Controller
             $request->validate([
                 'first_name' => 'required|string|max:255',
                 'last_name' => 'required|string|max:255',
-                'username' => 'nullable|regex:/(^([a-zA-Z]+)(\d+)?$)/u',
+                'username' => 'required|regex:/(^([a-zA-Z]+)(\d+)?$)/u',
                 'bio' => 'string|max:255',
             ]);
             $user = User::findOrFail(Auth::user()->id);
             $user->first_name = $request->first_name;
             $user->last_name = $request->last_name;
+            if($request->get('username') != null){
             $user->username = $request->username;
+            }
             $user->bio = $request->bio;
             $user->update();
 
