@@ -7,10 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Spatie\Permission\Traits\HasRoles;
 use Overtrue\LaravelFollow\Followable;
-
-
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
@@ -40,7 +38,7 @@ class User extends Authenticatable
         'fb_id',
         'dob',
         'gender',
-        'bio'
+        'bio',
     ];
 
     /**
@@ -89,6 +87,11 @@ class User extends Authenticatable
 
     public function needsToApproveFollowRequests(): bool
     {
-        return $this->isaccount_public == 0 ?true:false;
+        return $this->isaccount_public == 0 ? true : false;
+    }
+    
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
     }
 }
