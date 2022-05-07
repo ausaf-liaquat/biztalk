@@ -102,10 +102,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
         //Contact
         Route::post('generate/contact', [ApiAuthController::class, 'generateContact']);
 
-
         Route::post('/message/show', [ChatController::class, 'show']);
 
         Route::post('/message', [ChatController::class, 'store']);
+
+        Route::post('/message/details', [ChatController::class, 'details']);
 
     });
 

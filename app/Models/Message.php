@@ -9,14 +9,7 @@ class Message extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['body', 'from_user_id', 'to_user_id','conversation_id'];
-
-    protected $appends = ['selfMessage'];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $fillable = ['body', 'from_user_id', 'to_user_id', 'conversation_id'];
 
     public function from()
     {
@@ -28,8 +21,4 @@ class Message extends Model
         return $this->belongsTo(User::class, 'to_user_id');
     }
 
-    public function conversation()
-    {
-        return $this->belongsTo('Nahid\Talk\Conversations\Conversation');
-    }
 }

@@ -3,45 +3,65 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ConvoListCollection;
+use App\Http\Resources\MessageCollection;
+use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Auth;
 use App\Traits\ApiResponser;
-use App\Http\Resources\UserCollection;
+use Auth;
+use Illuminate\Http\Request;
 
 class ChatController extends Controller
 {
-
     use ApiResponser;
+
     public function show(Request $request)
     {
-        $userid = Auth::user()->id;
-        $from = Message::where('from_user_id', $userid)->pluck('to_user_id')->toArray();
-        $to = Message::where('to_user_id', $userid)->pluck('from_user_id')->toArray();
-
-        $messages = Message::where(function ($query) use ($userid) {
-            $query->where('from');
-        })->orWhere(function ($query) use ($userid) {
-            $query->where('to', $userid);
+        $conversation = Conversation::where(function ($query) use ($request) {
+            $query->where('user_two', Auth::user()->id);
+        })->orWhere(function ($query) use ($request) {
+            $query->where('user_one', Auth::user()->id);
         })->get();
-        // if (($key = array_search($userid, $from)) !== false) {
-        //     unset($from[$key]);
-            
-        // }
-        $message_list = array_values(array_unique(array_merge($from,$to)));
 
-
-        return $this->success(['list'=>new UserCollection(User::whereIn('id',$message_list)->get())],'messages',200);
-
-        
+        return $this->success(['Conversations list' => new ConvoListCollection($conversation)], 'messages', 200);
     }
     public function store(Request $request)
     {
-        $message = $request->user()->messages()->create([
-            'body' => $request->body,
-        ]);
+        $conv = Conversation::where(function ($query) use ($request) {
+            $query->where('user_one', $request->get('userid'))->where('user_two', Auth::user()->id);
+        })->orWhere(function ($query) use ($request) {
+            $query->where('user_one', Auth::user()->id)->where('user_two', $request->get('userid'));
+        })->first();
 
-        return response()->json($message);
+        if (!empty($conv)) {
+            Message::create([
+                'body' => $request->body,
+                'from_user_id' => Auth::user()->id,
+                'to_user_id' => $request->get('userid'),
+                'conversation_id' => $conv->id,
+            ]);
+        } else {
+            $conversation = Conversation::create(['user_one' => Auth::user()->id, 'user_two' => $request->get('userid')]);
+            Message::create([
+                'body' => $request->body,
+                'from_user_id' => Auth::user()->id,
+                'to_user_id' => $request->get('userid'),
+                'conversation_id' => $conversation->id,
+            ]);
+        }
+
+        return $this->success([], 'message sent', 200);
+    }
+
+    public function details(Request $request)
+    {
+        $message_details = Message::where(function ($query) use ($request) {
+            $query->where('from_user_id', $request->get('userid'))->where('to_user_id', Auth::user()->id);
+        })->orWhere(function ($query) use ($request) {
+            $query->where('from_user_id', Auth::user()->id)->where('to_user_id', $request->get('userid'));
+        })->get();
+
+        return $this->success([new MessageCollection($message_details)], 'message details', 200);
     }
 }

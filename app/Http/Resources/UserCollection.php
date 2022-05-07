@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\ResourceCollection;
 use App\Models\User;
 use Auth;
+use Illuminate\Http\Resources\Json\ResourceCollection;
+
 class UserCollection extends ResourceCollection
 {
     /**
@@ -18,15 +19,15 @@ class UserCollection extends ResourceCollection
         return [
             $this->collection->map(function ($data) {
                 return [
-                    'user_id'=>$data->id,
+                    'user_id' => $data->id,
                     'username' => $data->username,
                     'bio' => Auth::user()->bio,
-                    'full_name'=> $data->first_name.' '.$data->last_name,
-                    'followers_count'=>$data->approvedFollowers()->count(),
-                    'followings_count'=>$data->approvedFollowings()->count(),
-                    'is_following'=>Auth::user()->isFollowing(User::find($data->id)),
+                    'full_name' => $data->first_name . ' ' . $data->last_name,
+                    'followers_count' => $data->approvedFollowers()->count(),
+                    'followings_count' => $data->approvedFollowings()->count(),
+                    'is_following' => Auth::user()->isFollowing(User::find($data->id)),
                     'isaccount_public' => $data->isaccount_public,
-                    'profile_image'=>asset('uploads/avtars/'.$data->profile_image)
+                    'profile_image' => asset('uploads/avtars/' . $data->profile_image),
                 ];
             }),
         ];
