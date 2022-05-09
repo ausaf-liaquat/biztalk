@@ -91,7 +91,6 @@ class ApiAuthController extends Controller
         if (!empty($request->get('phone_no'))) {
             $user->is_verified = 'active';
             $user->save();
-
         }
 
         $url = asset('uploads/avtars/' . $user->profile_image);

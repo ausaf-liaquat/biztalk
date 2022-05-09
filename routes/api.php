@@ -108,6 +108,16 @@ Route::group(['prefix' => 'v1', 'namespace' => 'API'], function () {
 
         Route::post('/message/details', [ChatController::class, 'details']);
 
+        Route::post('/report/video', [ChatController::class, 'reportVideo']);
+
     });
 
+});
+Route::fallback(function () {
+    return response()->json([
+        'data' => [],
+        'success' => false,
+        'status' => 404,
+        'message' => 'Invalid Route',
+    ]);
 });

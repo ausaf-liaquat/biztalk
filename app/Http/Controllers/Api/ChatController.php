@@ -7,6 +7,7 @@ use App\Http\Resources\ConvoListCollection;
 use App\Http\Resources\MessageCollection;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Models\ReportVideo;
 use App\Models\User;
 use App\Traits\ApiResponser;
 use Auth;
@@ -63,5 +64,16 @@ class ChatController extends Controller
         })->get();
 
         return $this->success([new MessageCollection($message_details)], 'message details', 200);
+    }
+    public function reportVideo(Request $request)
+    {
+        ReportVideo::create([
+            'reason' => $request->get('reason'),
+            'detail' => $request->get('details'),
+            'video_id' => $request->get('video_id'),
+            'user_id' => Auth::user()->id,
+            'status' => 'to_be_review',
+        ]);
+        return $this->success([], 'video reported', 200);
     }
 }
